@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAccessToken } from '../AccessTokenContext';
+import { likeItem, unlikeItem, checkIfUserLikedItem } from '../Likes';
+import * as client from '../users/client';
 
 function Details() {
     const location = useLocation();
@@ -12,23 +14,20 @@ function Details() {
     const [detail, setDetail] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    console.log("Access Token:", accessToken);
-    console.log("Identifier:", identifier);
-    console.log("Type:", type);
+    const [profile, setProfile] = useState(null);
+    const [isLiked, setIsLiked] = useState(false);
+
     const fetchDetail = async () => {
         if (!accessToken) {
             setError('No access token available');
             setLoading(false);
             return;
         }
-
         setLoading(true);
         try {
             const url = `https://api.spotify.com/v1/${type}s/${identifier}`;
             const response = await axios.get(url, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
+                headers: { Authorization: `Bearer ${accessToken}` }
             });
             setDetail(response.data);
         } catch (err) {
@@ -39,12 +38,51 @@ function Details() {
         }
     };
 
+    const fetchProfile = async () => {
+        try {
+            const profileData = await client.profile();
+            setProfile(profileData);
+            checkIfLiked(profileData._id, identifier);
+        } catch (error) {
+            console.error("Error fetching profile:", error);
+        }
+    };
+
+    const checkIfLiked = async (userId, itemId) => {
+        try {
+            const isLikedResponse = await checkIfUserLikedItem(userId, itemId);
+            setIsLiked(isLikedResponse);
+        } catch (error) {
+            console.error("Error checking if item is liked:", error);
+        }
+    };
 
     useEffect(() => {
         if (identifier && type && accessToken) {
             fetchDetail();
         }
+        fetchProfile();
     }, [identifier, type, accessToken]);
+
+    const handleLike = async () => {
+        if (!profile) return;
+        try {
+            await likeItem(profile._id, identifier, type, detail.name);
+            setIsLiked(true);
+        } catch (err) {
+            console.error('Error liking item:', err);
+        }
+    };
+
+    const handleUnlike = async () => {
+        if (!profile) return;
+        try {
+            await unlikeItem(profile._id, identifier);
+            setIsLiked(false);
+        } catch (err) {
+            console.error('Error unliking item:', err);
+        }
+    };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
@@ -80,6 +118,9 @@ function Details() {
                     {/* Additional artist-specific details */}
                 </div>
             )}
+            <button onClick={isLiked ? handleUnlike : handleLike}>
+                {isLiked ? 'Unlike' : 'Like'}
+            </button>
         </div>
 
     );
