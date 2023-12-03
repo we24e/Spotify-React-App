@@ -1,0 +1,35 @@
+.review-panel {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    background-color: black;
+}
+
+.review-image-container {
+    flex: 1;
+    padding: 10px;
+    text-decoration: none;
+}
+
+.review-image {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.review-text-panel {
+    flex: 2;
+    padding: 10px;
+    text-align: left;
+    color: white;
+    border-radius: 5px;
+    margin: 10px;
+}
+
+.carousel-indicators {
+    margin-bottom: 1px !important;
+}
+
+.carousel-control-next {
+    margin-left: 10px;
+}
