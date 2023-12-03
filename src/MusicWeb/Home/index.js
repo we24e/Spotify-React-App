@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as client from '../users/client';
 import * as likes from '../Likes';
-import "../index.css";
 
 function Home() {
     const [profile, setProfile] = useState(null);

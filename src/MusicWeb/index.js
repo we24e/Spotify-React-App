@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-
+import './index.css';
 import Home from './Home';
 import Search from './Search';
 import Details from './Details';
@@ -18,12 +18,12 @@ function MusicWeb() {
                 <div>
                     {/* Nav Bar */}
                     <nav style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>
-                        <Link to="/home" style={{ marginRight: '10px' }}>Home</Link>
-                        <Link to="/login" style={{ marginRight: '10px' }}>Login</Link>
-                        <Link to="/signup" style={{ marginRight: '10px' }}>Register</Link>
-                        <Link to="/profile" style={{ marginRight: '10px' }}>Profile</Link>
-                        <Link to="/users" style={{ marginRight: '10px' }}>Users</Link>
-                        <Link to="/search">Search</Link>
+                        <Link to="/home" style={{ marginRight: '10px' }} className="no-underline">Home</Link>
+                        <Link to="/login" style={{ marginRight: '10px' }} className="no-underline">Login</Link>
+                        <Link to="/signup" style={{ marginRight: '10px' }} className="no-underline">Register</Link>
+                        <Link to="/profile" style={{ marginRight: '10px' }} className="no-underline">Profile</Link>
+                        <Link to="/users" style={{ marginRight: '10px' }} className="no-underline">Users</Link>
+                        <Link to="/search" className="no-underline">Search</Link>
                     </nav>
 
                     {/* Routes */}
