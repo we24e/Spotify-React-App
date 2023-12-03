@@ -104,7 +104,7 @@ function Profile() {
                                     <tbody>
                                         {followers.map(follower => (
                                             <tr key={follower._id}>
-                                                <td><Link to={`/profile/${follower._id}`}>{follower.username}</Link></td>
+                                                <td><Link to={`/profile/${follower._id}`} className="no-underline">{follower.username}</Link></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -128,7 +128,7 @@ function Profile() {
                                     <tbody>
                                         {following.map(followed => (
                                             <tr key={followed._id}>
-                                                <td><Link to={`/profile/${followed._id}`}>{followed.username}</Link></td>
+                                                <td><Link to={`/profile/${followed._id}`} className="no-underline">{followed.username}</Link></td>
                                             </tr>
                                         ))}
                                     </tbody>
