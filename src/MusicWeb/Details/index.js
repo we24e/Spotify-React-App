@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAccessToken } from '../AccessTokenContext';
 import { likeItem, unlikeItem, checkIfUserLikedItem } from '../Likes';
 import * as client from '../users/client';
+import { fetchReviewsForItem, createReview, fetchReviewsByUser, deleteReview } from '../Reviews';
 
 function Details() {
     const location = useLocation();
@@ -16,6 +17,10 @@ function Details() {
     const [error, setError] = useState(null);
     const [profile, setProfile] = useState(null);
     const [isLiked, setIsLiked] = useState(false);
+    const [reviewText, setReviewText] = useState('');
+    const [reviews, setReviews] = useState([]);
+    const [userHasReviewed, setUserHasReviewed] = useState(false);
+    const [checkingReview, setCheckingReview] = useState(true);
     const navigate = useNavigate();
     const fetchDetail = async () => {
         if (!accessToken) {
@@ -30,7 +35,6 @@ function Details() {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             setDetail(response.data);
-            console.log("response.data", response.data);
         } catch (err) {
             console.error('Error fetching details:', err);
             setError(err.message);
@@ -57,13 +61,162 @@ function Details() {
             console.error("Error checking if item is liked:", error);
         }
     };
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            if (profile && identifier) {
+                setCheckingReview(true);
+                await checkUserReview();
+                setCheckingReview(false);
+            }
+        };
+
+        fetchInitialData();
+    }, [profile, identifier]);
 
     useEffect(() => {
         if (identifier && type && accessToken) {
             fetchDetail();
         }
         fetchProfile();
+        checkUserReview();
+        fetchReviews();
     }, [identifier, type, accessToken]);
+
+    const fetchReviews = async () => {
+        try {
+            const fetchedReviews = await fetchReviewsForItem(identifier);
+            setReviews(fetchedReviews);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+        }
+    };
+
+    const handleReviewSubmit = async () => {
+        try {
+            if (type === 'album' && detail) {
+                const albumDataToLike = {
+                    name: detail.name,
+                    releaseDate: detail.release_date,
+                    label: detail.label,
+                    image: detail.images[0].url,
+                    tracks: detail.tracks.items.map(track => ({
+                        name: track.name,
+                        duration: track.duration_ms,
+                        previewUrl: track.preview_url,
+                        spotifyLink: track.external_urls.spotify
+                    }))
+                };
+                await createReview(profile._id, albumDataToLike, reviewText, type, identifier);
+                console.log('Review submitted successfully');
+                setReviewText('');
+                setUserHasReviewed(true);
+                fetchReviews();
+            }
+            else if (type === 'track' && detail) {
+                const trackDataToLike = {
+                    name: detail.name,
+                    duration: detail.duration_ms,
+                    previewUrl: detail.preview_url,
+                    spotifyLink: detail.external_urls.spotify,
+                    album: {
+                        name: detail.album.name,
+                        releaseDate: detail.album.release_date,
+                        image: detail.album.images[0].url
+                    },
+                    artists: detail.artists.map(artist => ({
+                        name: artist.name,
+                    }))
+                };
+                await createReview(profile._id, trackDataToLike, reviewText, type, identifier);
+                console.log('Review submitted successfully');
+                setReviewText('');
+                setUserHasReviewed(true);
+                fetchReviews();
+            }
+
+            else if (type === 'artist' && detail) {
+                const artistDataToLike = {
+                    name: detail.name,
+                    popularity: detail.popularity,
+                    genres: detail.genres,
+                    followers: detail.followers.total,
+                    image: detail.images[0]?.url
+                };
+                await createReview(profile._id, artistDataToLike, reviewText, type, identifier);
+                console.log('Review submitted successfully');
+                setReviewText('');
+                setUserHasReviewed(true);
+                fetchReviews();
+            }
+            else {
+                console.error('Error reviewing item: invalid type or detail');
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+        }
+    };
+
+    const renderReviews = () => (
+        <div>
+            <h4>Reviews:</h4>
+            {reviews.map((review, index) => (
+                <div key={index}>
+                    <p>{review.userId.username}: {review.reviewText}</p>
+                </div>
+            ))}
+        </div>
+    );
+
+    const checkUserReview = async () => {
+        if (profile) {
+            try {
+                const userReviews = await fetchReviewsByUser(profile._id);
+                const hasReviewed = userReviews.some(review => review.itemID === identifier);
+                setUserHasReviewed(hasReviewed);
+            } catch (error) {
+                console.error('Error checking user review:', error);
+            }
+        }
+    };
+
+    const renderReviewSection = () => {
+        if (!profile || checkingReview) {
+            return <div>Please login to Add a Review</div>;
+        }
+        if (userHasReviewed) {
+            const userReview = reviews.find(review => review.userId._id === profile?._id);
+            return (
+                <div>
+                    <h4>Your Review:</h4>
+                    <p>{userReview?.reviewText}</p>
+                    <button onClick={() => handleReviewDelete(userReview?._id)}>Delete Review</button>
+                </div>
+            );
+        } else {
+            return (
+                <div>
+                    <h3>Write a Review:</h3>
+                    <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="Your review here..."
+                    />
+                    <button onClick={handleReviewSubmit}>Submit Review</button>
+                </div>
+            );
+        }
+    };
+
+    const handleReviewDelete = async (reviewId) => {
+        console.log('Deleting review with id:', reviewId);
+        try {
+            await deleteReview(reviewId);
+            setUserHasReviewed(false);
+            fetchReviews();
+        } catch (error) {
+            console.error('Error deleting review:', error);
+        }
+    };
 
     const handleLike = async () => {
         if (!profile) {
@@ -232,6 +385,8 @@ function Details() {
             <button onClick={isLiked ? handleUnlike : handleLike}>
                 {isLiked ? 'Unlike' : 'Like'}
             </button>
+            {renderReviewSection()}
+            {renderReviews()}
         </div>
     );
 }

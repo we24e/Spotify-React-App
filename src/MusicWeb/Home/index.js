@@ -2,12 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as client from '../users/client';
 import * as likes from '../Likes';
+import { Carousel } from 'react-bootstrap';
+import { fetchReviewsByUser } from '../Reviews';
+import './index.css';
 
 function Home() {
     const [profile, setProfile] = useState(null);
     const [likedAlbums, setLikedAlbums] = useState([]);
     const [likedTracks, setLikedTracks] = useState([]);
     const [likedArtists, setLikedArtists] = useState([]);
+    const [userReviews, setUserReviews] = useState([]);
 
     const fetchProfile = async () => {
         try {
@@ -15,6 +19,17 @@ function Home() {
             setProfile(profileData);
         } catch (error) {
             console.error("Error fetching profile:", error);
+        }
+    };
+
+    const fetchUserReviews = async () => {
+        if (profile) {
+            try {
+                const reviews = await fetchReviewsByUser(profile._id);
+                setUserReviews(reviews);
+            } catch (error) {
+                console.error("Error fetching user reviews:", error);
+            }
         }
     };
 
@@ -60,6 +75,7 @@ function Home() {
             fetchLikedAlbums();
             fetchLikedTracks();
             fetchLikedArtists();
+            fetchUserReviews();
         }
     }, [profile]);
 
@@ -72,20 +88,49 @@ function Home() {
             case 'artist':
                 return item.detail.image;
             default:
-                return ''; 
+                return '';
         }
     };
+    const renderReviewsSection = (reviews) => {
+        return (
+            <Carousel>
+                {reviews.map(review => (
+                    <Carousel.Item key={review._id}>
+                        <div className="review-panel d-flex">
+                            <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
+                                <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
+                            </Link>
+    
+                            {/* Use Bootstrap classes for aligning text in the middle */}
+                            <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
+                                <p className="m-0">{review.reviewText}</p>
+                            </div>
+                        </div>
+                    </Carousel.Item>
+                ))}
+            </Carousel>
+        );
+    };
+    
+
+
 
     const renderLikedSection = (items, type) => {
-        return items.map(item => (
-            <Link to={`/details?identifier=${item.itemId}&type=${type}`} key={item._id} className="card no-underline">
-                <img src={getImageUrl(item, type)} alt={item.itemTitle} className="card-img-top" />
-                <div className="card-body">
-                    <p className="card-text text-primary text-center">{item.itemTitle}</p>
-                </div>
-            </Link>
-        ));
-    };    
+        return (
+            <Carousel>
+                {items.map(item => (
+                    <Carousel.Item key={item._id}>
+                        <Link to={`/details?identifier=${item.itemId}&type=${type}`} className="no-underline">
+                            <img src={getImageUrl(item, type)} alt={item.itemTitle} className="d-block w-100" />
+                            {/* <Carousel.Caption>
+                                <p className="text-white text-center">{item.itemTitle}</p>
+                            </Carousel.Caption> */}
+                        </Link>
+                    </Carousel.Item>
+                ))}
+            </Carousel>
+        );
+    };
 
     return (
         <div>
@@ -94,17 +139,23 @@ function Home() {
                 <div className="container">
                     <p>Welcome, {profile.username}!</p>
                     <div className="row">
+                        <div className="col-md-12">
+                            <h3>My Reviews</h3>
+                            {renderReviewsSection(userReviews)}
+                        </div>
+                    </div>
+                    <div className="row">
                         <div className="col-md-4">
                             <h3>Liked Albums</h3>
-                            <div>{renderLikedSection(likedAlbums, 'album')}</div>
+                            {renderLikedSection(likedAlbums, 'album')}
                         </div>
                         <div className="col-md-4">
                             <h3>Liked Tracks</h3>
-                            <div>{renderLikedSection(likedTracks, 'track')}</div>
+                            {renderLikedSection(likedTracks, 'track')}
                         </div>
                         <div className="col-md-4">
                             <h3>Liked Artists</h3>
-                            <div>{renderLikedSection(likedArtists, 'artist')}</div>
+                            {renderLikedSection(likedArtists, 'artist')}
                         </div>
                     </div>
                 </div>
