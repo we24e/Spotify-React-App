@@ -69,19 +69,20 @@ function Search() {
         if (!token) {
             token = await getAccessToken();
         }
-
+    
         if (!token) {
             console.error('Access token is not available');
             return;
         }
-
+    
         try {
+            const encodedQuery = encodeURIComponent(year ? `${query} year:${year}` : query);
             const response = await axios.get('https://api.spotify.com/v1/search', {
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
                 params: {
-                    q: year ? `${query} year:${year}` : query,
+                    q: encodedQuery,
                     type,
                     limit: 10,
                     offset: 0
@@ -93,6 +94,7 @@ function Search() {
             console.error('Error during search:', error);
         }
     };
+    
 
     return (
         <div>

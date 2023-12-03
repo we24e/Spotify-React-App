@@ -12,7 +12,7 @@ function UserProfile() {
             const isFollowingData = await client.checkIfFollowing(id);
             setIsFollowing(isFollowingData);
         } catch (err) {
-            console.error("Error checking following status:", err);
+            console.error("Error checking following (Probably not loggedIN):", err);
         }
     };
 
@@ -40,7 +40,8 @@ function UserProfile() {
                 setIsFollowing(true);
             }
         } catch (err) {
-            console.error("Error following/unfollowing user (Probably not SignedIN):", err);
+            console.error("Error following/unfollowing user (Probably not loggedIN):", err);
+            alert('Please log in first.');
             navigate("/login");
         }
     };
