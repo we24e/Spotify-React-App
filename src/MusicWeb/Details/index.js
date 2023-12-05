@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAccessToken } from '../AccessTokenContext';
+import { AccessTokenContext } from '../AccessTokenContext';
 import { likeItem, unlikeItem, checkIfUserLikedItem } from '../Likes';
 import * as client from '../users/client';
 import { fetchReviewsForItem, createReview, fetchReviewsByUser, deleteReview } from '../Reviews';
 
 function Details() {
     const location = useLocation();
-    const { accessToken } = useAccessToken();
+    const { accessToken } = useContext(AccessTokenContext);
     const [searchParams] = useSearchParams();
     const identifier = searchParams.get('identifier');
     const type = searchParams.get('type');
@@ -93,63 +93,14 @@ function Details() {
 
     const handleReviewSubmit = async () => {
         try {
-            if (type === 'album' && detail) {
-                const albumDataToLike = {
-                    name: detail.name,
-                    releaseDate: detail.release_date,
-                    label: detail.label,
-                    image: detail.images[0].url,
-                    tracks: detail.tracks.items.map(track => ({
-                        name: track.name,
-                        duration: track.duration_ms,
-                        previewUrl: track.preview_url,
-                        spotifyLink: track.external_urls.spotify
-                    }))
-                };
-                await createReview(profile._id, albumDataToLike, reviewText, type, identifier);
+            if (profile && reviewText) {
+                await createReview(profile._id, reviewText, type, identifier);
                 console.log('Review submitted successfully');
                 setReviewText('');
                 setUserHasReviewed(true);
                 fetchReviews();
-            }
-            else if (type === 'track' && detail) {
-                const trackDataToLike = {
-                    name: detail.name,
-                    duration: detail.duration_ms,
-                    previewUrl: detail.preview_url,
-                    spotifyLink: detail.external_urls.spotify,
-                    album: {
-                        name: detail.album.name,
-                        releaseDate: detail.album.release_date,
-                        image: detail.album.images[0].url
-                    },
-                    artists: detail.artists.map(artist => ({
-                        name: artist.name,
-                    }))
-                };
-                await createReview(profile._id, trackDataToLike, reviewText, type, identifier);
-                console.log('Review submitted successfully');
-                setReviewText('');
-                setUserHasReviewed(true);
-                fetchReviews();
-            }
-
-            else if (type === 'artist' && detail) {
-                const artistDataToLike = {
-                    name: detail.name,
-                    popularity: detail.popularity,
-                    genres: detail.genres,
-                    followers: detail.followers.total,
-                    image: detail.images[0]?.url
-                };
-                await createReview(profile._id, artistDataToLike, reviewText, type, identifier);
-                console.log('Review submitted successfully');
-                setReviewText('');
-                setUserHasReviewed(true);
-                fetchReviews();
-            }
-            else {
-                console.error('Error reviewing item: invalid type or detail');
+            } else {
+                console.error('Error: Profile not found or review text empty');
             }
         } catch (error) {
             console.error('Error submitting review:', error);

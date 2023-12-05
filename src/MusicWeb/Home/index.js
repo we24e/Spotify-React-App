@@ -1,17 +1,66 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import * as client from '../users/client';
 import * as likes from '../Likes';
 import { Carousel } from 'react-bootstrap';
-import { fetchReviewsByUser } from '../Reviews';
+import { fetchReviewsByUser, fetchLatest5Reviews } from '../Reviews';
 import './index.css';
+import { fetchItemDetails } from '../Search/util';
+import { AccessTokenContext } from '../AccessTokenContext'; 
 
 function Home() {
+    const { accessToken } = useContext(AccessTokenContext);
     const [profile, setProfile] = useState(null);
     const [likedAlbums, setLikedAlbums] = useState([]);
     const [likedTracks, setLikedTracks] = useState([]);
     const [likedArtists, setLikedArtists] = useState([]);
     const [userReviews, setUserReviews] = useState([]);
+    const [latestReviews, setLatestReviews] = useState([]);
+
+    const fetchLikedItemsDetails = async (items, type) => {
+        return Promise.all(items.map(async (item) => {
+            const details = await fetchItemDetails(item.itemId, type, accessToken);
+            return { ...item, details };
+        }));
+    };
+
+    const fetchLatestReviews = async () => {
+        try {
+            const reviews = await fetchLatest5Reviews();
+            const reviewsWithDetails = await Promise.all(reviews.map(async review => {
+                const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
+                return { ...review, details };
+            }));
+            setLatestReviews(reviewsWithDetails);
+        } catch (error) {
+            console.error("Error fetching latest reviews:", error);
+        }
+    };
+    const renderLatestReviewsSection = () => {
+        return (
+            <div className="m-4">
+                <h3>Latest Reviews</h3>
+                <ul className="list-unstyled">
+                    {latestReviews.length > 0 ? (
+                        latestReviews.map(review => (
+                            <li key={review._id} className="d-flex align-items-center mb-2">
+                                <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="text-decoration-none text-dark">
+                                    <img src={getImageUrl(review)} alt="Review" className="img-fluid me-2" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                                </Link>
+                                <div>
+                                    <strong className="me-2">{review.details.name}:</strong>
+                                    <span>{review.reviewText.slice(0, 30)}{review.reviewText.length > 30 ? '...' : ''}</span>
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <p>No latest reviews available.</p>
+                    )}
+                </ul>
+            </div>
+        );
+    };
+    
 
     const fetchProfile = async () => {
         try {
@@ -26,18 +75,24 @@ function Home() {
         if (profile) {
             try {
                 const reviews = await fetchReviewsByUser(profile._id);
-                setUserReviews(reviews);
+                const reviewsWithDetails = await Promise.all(reviews.map(async review => {
+                    const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
+                    return { ...review, details };
+                }));
+                setUserReviews(reviewsWithDetails);
             } catch (error) {
                 console.error("Error fetching user reviews:", error);
             }
         }
     };
+    
 
     const fetchLikedAlbums = async () => {
         if (profile) {
             try {
                 const albums = await likes.fetchLikedItems(profile._id, 'album');
-                setLikedAlbums(albums);
+                const albumsDetails = await fetchLikedItemsDetails(albums, 'album');
+                setLikedAlbums(albumsDetails);
             } catch (error) {
                 console.error("Error fetching liked albums:", error);
             }
@@ -48,7 +103,8 @@ function Home() {
         if (profile) {
             try {
                 const tracks = await likes.fetchLikedItems(profile._id, 'track');
-                setLikedTracks(tracks);
+                const trackDetails = await fetchLikedItemsDetails(tracks, 'track');
+                setLikedTracks(trackDetails);
             } catch (error) {
                 console.error("Error fetching liked tracks:", error);
             }
@@ -59,7 +115,8 @@ function Home() {
         if (profile) {
             try {
                 const artists = await likes.fetchLikedItems(profile._id, 'artist');
-                setLikedArtists(artists);
+                const artistsDetails = await fetchLikedItemsDetails(artists, 'artist');
+                setLikedArtists(artistsDetails);
             } catch (error) {
                 console.error("Error fetching liked artists:", error);
             }
@@ -67,26 +124,30 @@ function Home() {
     };
 
     useEffect(() => {
+        fetchLatestReviews();
         fetchProfile();
     }, []);
 
     useEffect(() => {
-        if (profile) {
+        if (profile && accessToken) {
             fetchLikedAlbums();
             fetchLikedTracks();
             fetchLikedArtists();
             fetchUserReviews();
         }
-    }, [profile]);
+    }, [profile && accessToken]);
 
-    const getImageUrl = (item, type) => {
-        switch (type) {
+    const getImageUrl = (item) => {
+        console.log(item);
+        if (!item.details) return '';
+
+        switch (item.itemType) {
             case 'album':
-                return item.detail.image;
+                return item.details.images[0].url;
             case 'track':
-                return item.detail.album.image;
+                return item.details.album.images[0].url;
             case 'artist':
-                return item.detail.image;
+                return item.details.images[0].url;
             default:
                 return '';
         }
@@ -96,14 +157,14 @@ function Home() {
             <Carousel>
                 {reviews.map(review => (
                     <Carousel.Item key={review._id}>
-                        <div className="review-panel d-flex">
+                        <div className="review-panel d-flex my-reviews">
                             <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
                                 <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
                             </Link>
-    
-                            {/* Use Bootstrap classes for aligning text in the middle */}
                             <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
-                                <p className="m-0">{review.reviewText}</p>
+                                <p className="m-0">
+                                    {review.reviewText.length > 100 ? review.reviewText.slice(0, 100) + '...' : review.reviewText}
+                                </p>
                             </div>
                         </div>
                     </Carousel.Item>
@@ -112,19 +173,13 @@ function Home() {
         );
     };
     
-
-
-
     const renderLikedSection = (items, type) => {
         return (
             <Carousel>
                 {items.map(item => (
                     <Carousel.Item key={item._id}>
                         <Link to={`/details?identifier=${item.itemId}&type=${type}`} className="no-underline">
-                            <img src={getImageUrl(item, type)} alt={item.itemTitle} className="d-block w-100" />
-                            {/* <Carousel.Caption>
-                                <p className="text-white text-center">{item.itemTitle}</p>
-                            </Carousel.Caption> */}
+                            <img src={getImageUrl(item)} alt={item.details?.name} className="d-block w-100" />
                         </Link>
                     </Carousel.Item>
                 ))}
@@ -135,6 +190,7 @@ function Home() {
     return (
         <div>
             <h2>Home</h2>
+            {renderLatestReviewsSection()}
             {profile ? (
                 <div className="container">
                     <p>Welcome, {profile.username}!</p>
