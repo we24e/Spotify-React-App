@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import './index.css';
 import Home from './Home';
 import Search from './Search';
 import Details from './Details';
@@ -10,6 +9,7 @@ import Profile from './users/profile';
 import Login from "./users/signin";
 import UserTable from "./users/table";
 import UserProfile from './users/userProfile';
+import './index.css';
 
 function MusicWeb() {
     return (
@@ -17,7 +17,7 @@ function MusicWeb() {
             <Router>
                 <div>
                     {/* Nav Bar */}
-                    <nav style={{ backgroundColor: '#f0f0f0', padding: '10px' }}>
+                    <nav className='navbar p-2'>
                         <Link to="/home" style={{ marginRight: '10px' }} className="no-underline">Home</Link>
                         <Link to="/login" style={{ marginRight: '10px' }} className="no-underline">Login</Link>
                         <Link to="/signup" style={{ marginRight: '10px' }} className="no-underline">Register</Link>

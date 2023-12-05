@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAccessToken } from '../AccessTokenContext';
+import { AccessTokenContext } from '../AccessTokenContext';
+
 import "./index.css";
 
 function renderResults(results) {
@@ -72,38 +73,31 @@ function Search() {
     const [type, setType] = useState('album');
     const [year, setYear] = useState('');
     const [results, setResults] = useState(null);
-    const { accessToken, setAccessToken } = useAccessToken();
+    const { accessToken } = useContext(AccessTokenContext);
     const navigate = useNavigate();
     const [limit, setLimit] = useState(10);
 
-    const getAccessToken = async () => {
-        try {
-            const response = await axios.post('http://localhost:4000/getAccessToken');
-            const token = response.data.access_token;
-            setAccessToken(token);
-            return token;
-        } catch (error) {
-            console.error('Error fetching access token:', error);
-            return null;
-        }
-    };
-
+    // const getAccessToken = async () => {
+    //     try {
+    //         const response = await axios.post('http://localhost:4000/getAccessToken');
+    //         const token = response.data.access_token;
+    //         setAccessToken(token);
+    //         return token;
+    //     } catch (error) {
+    //         console.error('Error fetching access token:', error);
+    //         return null;
+    //     }
+    // };
     const searchSpotify = async () => {
-        let token = accessToken;
-        if (!token) {
-            token = await getAccessToken();
-        }
-
-        if (!token) {
+        if (!accessToken) {
             console.error('Access token is not available');
             return;
         }
-
         try {
             const encodedQuery = encodeURIComponent(year ? `${query} year:${year}` : query);
             const response = await axios.get('https://api.spotify.com/v1/search', {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${accessToken}`
                 },
                 params: {
                     q: encodedQuery,

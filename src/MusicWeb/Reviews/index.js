@@ -1,10 +1,10 @@
 import axios from 'axios';
 export const API_BASE_URL = process.env.REACT_APP_BASE_API_URL;
 
-export const createReview = async (userId, detail, reviewText, itemType, itemID) => {
+export const createReview = async (userId, reviewText, itemType, itemID) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/api/reviews`, {
-            userId, detail, reviewText, itemType, itemID
+            userId, reviewText, itemType, itemID
         });
         return response.data;
     } catch (error) {
@@ -43,3 +43,22 @@ export const fetchReviewsByUser = async (userId) => {
     }
 };
 
+export const fetchAllReviews = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/reviews`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching all reviews:', error);
+        throw error;
+    }
+};
+
+export const fetchLatest5Reviews = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/api/reviews/latest`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching latest 5 reviews:', error);
+        throw error;
+    }
+};
