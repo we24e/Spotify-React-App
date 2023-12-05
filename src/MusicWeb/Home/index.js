@@ -48,8 +48,8 @@ function Home() {
                                     <img src={getImageUrl(review)} alt="Review" className="img-fluid me-2" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
                                 </Link>
                                 <div>
-                                    <strong className="me-2">{review.details.name}:</strong>
-                                    <span>{review.reviewText.slice(0, 30)}{review.reviewText.length > 30 ? '...' : ''}</span>
+                                    <strong className="me-2">{review.details ? review.details.name : 'Unknown Item'}:</strong>
+                                    <span>{review.reviewText.slice(0, 40)}{review.reviewText.length > 40 ? '...' : ''}</span>
                                 </div>
                             </li>
                         ))
@@ -60,6 +60,7 @@ function Home() {
             </div>
         );
     };
+    
     
 
     const fetchProfile = async () => {
