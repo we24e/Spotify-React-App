@@ -10,7 +10,7 @@
 }
 
 .card {
-    background-color: #bb86fc;
+    background-color: #bb86fc !important;
 }
 
 .card-title {

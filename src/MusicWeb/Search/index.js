@@ -46,15 +46,15 @@ function renderResults(results) {
 
 
     const renderAlbums = (albums) => {
-        return albums.items.map(album => renderItemCard(album, 'album', album.images[0].url, album.name));
+        return albums.items.map(album => renderItemCard(album, 'album', album.images[0]?.url, album.name));
     };
 
     const renderTracks = (tracks) => {
-        return tracks.items.map(track => renderItemCard(track, 'track', track.album.images[0].url, track.name));
+        return tracks.items.map(track => renderItemCard(track, 'track', track.album.images[0]?.url, track.name));
     };
 
     const renderArtists = (artists) => {
-        return artists.items.map(artist => renderItemCard(artist, 'artist', artist.images[0].url, artist.name));
+        return artists.items.map(artist => renderItemCard(artist, 'artist', artist.images[0]?.url, artist.name));
     };
 
     return (
