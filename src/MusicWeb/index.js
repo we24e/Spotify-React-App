@@ -9,6 +9,7 @@ import Profile from './users/profile';
 import Login from "./users/signin";
 import UserTable from "./users/table";
 import UserProfile from './users/userProfile';
+import Playlist from './Playlists';
 import './index.css';
 
 function MusicWeb() {
@@ -36,6 +37,7 @@ function MusicWeb() {
                         <Route path="/profile" element={<Profile />} />
                         <Route path="/users" element={<UserTable />} />
                         <Route path="/profile/:id" element={<UserProfile />} />
+                        <Route path="/playlists/:playlistId" element={<Playlist />} />
                         <Route path="*" element={<Navigate to="/login" replace />} />
                     </Routes>
                 </div>

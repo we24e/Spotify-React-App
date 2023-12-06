@@ -34,6 +34,48 @@
     margin-left: 10px;
 }
 
-.my-reviews{
+.my-reviews {
     background-color: darkslategrey;
+}
+
+.mySwiper {
+    width: auto;
+    height: auto;
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.mySwiper .swiper-slide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    font-size: 18px;
+    width: 35%;
+}
+
+.swiper-slide-image {
+    width: 120%;
+    height: 120%;
+    transition: transform 0.3s ease-in-out;
+}
+
+.mySwiper .swiper-slide-active {
+    z-index: 1;
+    transform: scale(1.25);
+}
+
+.mySwiper .swiper-slide-next,
+.mySwiper .swiper-slide-prev {
+    transform: scale(0.8);
+    opacity: 0.6;
+}
+
+.mySwiper .swiper-slide-shadow-left,
+.mySwiper .swiper-slide-shadow-right {
+    opacity: 0.6;
+}
+
+.user-playlist {
+    width: 50% !important;
 }

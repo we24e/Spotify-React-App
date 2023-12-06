@@ -1,6 +1,7 @@
 import * as client from "./client";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import * as playList from "../Playlists/client";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -8,8 +9,50 @@ function Profile() {
     const [following, setFollowing] = useState([]);
     const [followersCollapsed, setFollowersCollapsed] = useState(true);
     const [followingCollapsed, setFollowingCollapsed] = useState(true);
-
+    const [newPlaylistTitle, setNewPlaylistTitle] = useState('');
+    const [playlists, setPlaylists] = useState([]);
     const navigate = useNavigate();
+
+    const fetchPlaylists = async () => {
+        if (profile && profile._id) {
+            try {
+                const userPlaylists = await playList.fetchPlaylistsByUser(profile._id);
+                setPlaylists(userPlaylists);
+            } catch (error) {
+                console.error('Error fetching playlists:', error);
+                alert("Failed to fetch playlists.");
+            }
+        }
+    };
+
+    const createPlaylist = async () => {
+        if (!newPlaylistTitle) {
+            alert("Please enter a title for the playlist.");
+            return;
+        }
+        try {
+            await playList.createPlaylist(profile._id, newPlaylistTitle, []);
+            alert("Playlist created successfully!");
+            fetchPlaylists();
+            setNewPlaylistTitle('');
+        } catch (error) {
+            console.error('Error creating playlist:', error);
+            alert("Failed to create playlist.");
+        }
+    };
+
+    const deletePlaylist = async (playlistId) => {
+        if (window.confirm("Are you sure you want to delete this playlist?")) {
+            try {
+                await playList.deletePlaylist(playlistId);
+                setPlaylists(playlists.filter(pl => pl._id !== playlistId));
+                alert("Playlist deleted successfully!");
+            } catch (error) {
+                console.error('Error deleting playlist:', error);
+                alert("Failed to delete playlist.");
+            }
+        }
+    };
 
     const formatDateForDisplay = (isoString) => {
         const date = new Date(isoString);
@@ -50,6 +93,7 @@ function Profile() {
             }
             if (profile && profile._id) {
                 await fetchFollowersAndFollowing(profile._id);
+                await fetchPlaylists();
             }
         };
 
@@ -59,7 +103,7 @@ function Profile() {
     return (
         <div className="w-50">
             <h1>Profile</h1>
-            {profile && (
+            {profile ? (
                 <div>
                     <label>Username: <input value={profile.username} disabled /></label>
                     <label>Password: <input value={profile.password} onChange={(e) => setProfile({ ...profile, password: e.target.value })} /></label>
@@ -87,6 +131,30 @@ function Profile() {
                     <br />
                     <button onClick={signout}>Signout</button>
                     <br />
+                    <div>
+                        <h2>My Playlists</h2>
+                        {playlists.length > 0 ? (
+                            <ul>
+                                {playlists.map((playlist, index) => (
+                                    <li key={playlist._id}>
+                                        <Link to={`/playlists/${playlist._id}`} className="no-underline">
+                                            {playlist.title} ({playlist.trackIDs.length} songs)
+                                        </Link>
+                                        <button onClick={() => deletePlaylist(playlist._id)}>Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : <p>No playlists found.</p>}
+                    </div>
+                    <div>
+                        <label>New Playlist Title:</label>
+                        <input
+                            value={newPlaylistTitle}
+                            onChange={(e) => setNewPlaylistTitle(e.target.value)}
+                            placeholder="Enter playlist title"
+                        />
+                        <button onClick={createPlaylist}>Create Playlist</button>
+                    </div>
                     <div style={{ display: 'flex', justifyContent: 'space-around' }}>
 
                         <div>
@@ -137,7 +205,12 @@ function Profile() {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+                : (
+                    <p>Please Login to view your Profile.</p>
+                )
+            }
+
         </div>
     );
 }
