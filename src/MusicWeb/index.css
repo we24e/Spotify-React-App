@@ -87,3 +87,8 @@ footer {
         width: 100%;
     }
 }
+
+.universal-bg {
+    background-color: #bb86fc !important;
+    color: #fff !important;
+}
