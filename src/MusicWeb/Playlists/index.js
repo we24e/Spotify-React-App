@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import * as client from './client';
 import { fetchItemDetails } from '../Search/util';
 import { AccessTokenContext } from '../AccessTokenContext';
@@ -65,37 +65,34 @@ function Playlists() {
     return (
         <div className="container mt-4">
             {playlist ? (
-                <Card>
+                <Card className="playlist-card">
                     <Card.Header as="h2">PlayList: {playlist.title}</Card.Header>
                     <ListGroup variant="flush">
                         {tracksDetails.map((track, index) => (
-                            <ListGroupItem key={track.id || index}>
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4>{track.name}</h4>
-                                        <p>Artist: {track.artists.map(artist => artist.name).join(', ')}</p>
-                                        <p>Album: {track.album.name}</p>
-                                        <p>Duration: {formatDuration(track.duration_ms)}</p>
-                                        {track.preview_url && (
-                                            <audio controls src={track.preview_url}>
-                                                Your browser does not support the audio element.
-                                            </audio>
-                                        )}
-                                        <p>
-                                            <a href={track.external_urls.spotify} target="_blank" rel="noopener noreferrer">
-                                                Listen on Spotify
-                                            </a>
-                                        </p>
+                            <ListGroupItem key={track.id || index} className="track-item">
+                                <Link to={`/details?identifier=${track.id}&type=track`} style={{ textDecoration: 'none' }}>
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h4>{track.name}</h4>
+                                            <p>Artist: {track.artists.map(artist => artist.name).join(', ')}</p>
+                                            <p>Album: {track.album.name}</p>
+                                            <p>Duration: {formatDuration(track.duration_ms)}</p>
+                                            {track.preview_url && (
+                                                <audio controls src={track.preview_url}>
+                                                    Your browser does not support the audio element.
+                                                </audio>
+                                            )}
+                                        </div>
+                                        <div>
+                                            {track.album.images && track.album.images.length > 0 && (
+                                                <img src={track.album.images[0].url} alt={track.album.name} style={{ width: '150px', height: 'auto' }} />
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        {track.album.images && track.album.images.length > 0 && (
-                                            <img src={track.album.images[0].url} alt={track.album.name} style={{ width: '150px', height: 'auto' }} />
-                                        )}
-                                        {profile && profile._id === playlist.userId && (
-                                            <Button variant="danger" onClick={() => handleDeleteTrack(track.id)}>Delete</Button>
-                                        )}
-                                    </div>
-                                </div>
+                                </Link>
+                                {profile && profile._id === playlist.userId && (
+                                    <Button variant="danger" onClick={() => handleDeleteTrack(track.id)}>Delete</Button>
+                                )}
                             </ListGroupItem> 
                         ))}
                     </ListGroup>
