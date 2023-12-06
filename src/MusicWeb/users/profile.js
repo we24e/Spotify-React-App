@@ -117,6 +117,7 @@ function Profile() {
                         />
                     </label>
                     <label>Email: <input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} /></label>
+                    <br />
                     <label>Role:
                         <select value={profile.role} disabled>
                             <option value="USER">User</option>
@@ -124,6 +125,15 @@ function Profile() {
                             <option value="ADMIN">Admin</option>
                         </select>
                     </label>
+                    {profile.role === "ARTIST" && (
+                        <label>Artist ID:
+                            <input disabled
+                                value={profile.artistID || ''}
+                                onChange={(e) => setProfile({ ...profile, artistID: e.target.value })}
+                                name="artistID"
+                            />
+                        </label>
+                    )}
                     <br />
                     <br />
 
@@ -131,30 +141,34 @@ function Profile() {
                     <br />
                     <button onClick={signout}>Signout</button>
                     <br />
-                    <div>
-                        <h2>My Playlists</h2>
-                        {playlists.length > 0 ? (
-                            <ul>
-                                {playlists.map((playlist, index) => (
-                                    <li key={playlist._id}>
-                                        <Link to={`/playlists/${playlist._id}`} className="no-underline">
-                                            {playlist.title} ({playlist.trackIDs.length} songs)
-                                        </Link>
-                                        <button onClick={() => deletePlaylist(playlist._id)}>Delete</button>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : <p>No playlists found.</p>}
-                    </div>
-                    <div>
-                        <label>New Playlist Title:</label>
-                        <input
-                            value={newPlaylistTitle}
-                            onChange={(e) => setNewPlaylistTitle(e.target.value)}
-                            placeholder="Enter playlist title"
-                        />
-                        <button onClick={createPlaylist}>Create Playlist</button>
-                    </div>
+                    {profile.role === "USER" && (
+                        <>
+                            <div>
+                                <h2>My Playlists</h2>
+                                {playlists.length > 0 ? (
+                                    <ul>
+                                        {playlists.map((playlist, index) => (
+                                            <li key={playlist._id}>
+                                                <Link to={`/playlists/${playlist._id}`} className="no-underline">
+                                                    {playlist.title} ({playlist.trackIDs.length} songs)
+                                                </Link>
+                                                <button onClick={() => deletePlaylist(playlist._id)}>Delete</button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : <p>No playlists found.</p>}
+                            </div>
+                            <div>
+                                <label>New Playlist Title:</label>
+                                <input
+                                    value={newPlaylistTitle}
+                                    onChange={(e) => setNewPlaylistTitle(e.target.value)}
+                                    placeholder="Enter playlist title"
+                                />
+                                <button onClick={createPlaylist}>Create Playlist</button>
+                            </div>
+                        </>
+                    )}
                     <div style={{ display: 'flex', justifyContent: 'space-around' }}>
 
                         <div>

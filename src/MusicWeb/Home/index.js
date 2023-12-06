@@ -5,10 +5,10 @@ import * as likes from '../Likes';
 import { Carousel } from 'react-bootstrap';
 import { fetchReviewsByUser, fetchLatest5Reviews } from '../Reviews';
 import './index.css';
-import { fetchItemDetails } from '../Search/util';
+import { fetchItemDetails, fetchArtistAlbums, fetchArtistTopTracks } from '../Search/util';
 import { AccessTokenContext } from '../AccessTokenContext';
 import { fetchPlaylistsByUser, fetchAllPlaylists } from '../Playlists/client';
-import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -44,6 +44,9 @@ function Home() {
         }
     };
     const renderLatestReviewsSection = () => {
+        if (latestReviews.length === 0) {
+            return null;
+        }
         return (
             <div className="m-4">
                 <h3>Latest Reviews</h3>
@@ -151,25 +154,23 @@ function Home() {
 
     const fetchAllUserPlaylists = async () => {
         try {
-            // Use the imported function with a different local name
             const playlists = await fetchAllPlaylists();
             setAllPlaylists(playlists);
             fetchPlaylistImages(playlists);
         } catch (error) {
             console.error("Error fetching all playlists:", error);
-            setAllPlaylists([]); // Set to empty array in case of error
+            setAllPlaylists([]); 
         }
     };
 
     const fetchUserPlaylists = async () => {
         try {
-            // Use the imported function with a different local name
             const playlists = await fetchPlaylistsByUser(profile._id);
             setUserPlaylists(playlists.filter(pl => pl.trackIDs && pl.trackIDs.length > 0));
             fetchPlaylistImages(playlists);
         } catch (error) {
             console.error("Error fetching user playlists:", error);
-            setUserPlaylists([]); // Set to empty array in case of error
+            setUserPlaylists([]);
         }
     };
 
@@ -190,36 +191,117 @@ function Home() {
 
     useEffect(() => {
         if (profile && accessToken) {
-            fetchUserPlaylists(); // Call the renamed function
+            fetchUserPlaylists(); 
         }
-        fetchAllUserPlaylists(); // Call the renamed function
+        fetchAllUserPlaylists();
     }, [profile, accessToken]);
 
-    const renderPlaylistsSection = () => {
+    const [topTracks, setTopTracks] = useState([]);
+    const [albums, setAlbums] = useState([]);
+
+    useEffect(() => {
+        if (profile && accessToken && profile.role === 'ARTIST') {
+            fetchArtistTopTracks(profile.artistID, "US", accessToken).then(setTopTracks);
+            fetchArtistAlbums(profile.artistID, "US", accessToken).then(setAlbums);
+        }
+    }, [profile, accessToken]);
+
+    const renderTopTracks = () => {
+        if (!topTracks) return null;
+        const tracksArray = Array.isArray(topTracks) ? topTracks : topTracks.tracks;
+
         return (
-            <Carousel className='user-playlist'>
-                {userPlaylists.map(playlist => (
-                    <Carousel.Item key={playlist._id}>
-                        <Link to={`/playlists/${playlist._id}`} className="no-underline">
-                            <img src={playlistImages[playlist._id]} alt={playlist.title} className="d-block w-100 custom-image-size" />
+            <>
+                <h3>My Top5 Tracks</h3>
+                <Carousel>
+                    {tracksArray && tracksArray.slice(0, 5).map(track => (
+                        <Carousel.Item key={track.id}>
+                            <Link to={`/details?identifier=${track.id}&type=${'track'}`}>
+                                <img
+                                    className="d-block w-100"
+                                    src={track.album.images[0].url}
+                                    alt={track.name}
+                                />
+                            </Link>
                             <Carousel.Caption>
-                                <h3>{playlist.title}</h3>
+                                <h3>{track.name}</h3>
+                                <p>{track.artists.map(artist => artist.name).join(', ')}</p>
                             </Carousel.Caption>
-                        </Link>
-                    </Carousel.Item>
-                ))}
-            </Carousel>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
         );
     };
-    
+
+    const renderAlbums = () => {
+        if (!albums) return null;
+        const albumsArray = Array.isArray(albums) ? albums : albums.items;
+        return (
+            <>
+                <h3>My Albums</h3>
+                <Carousel>
+                    {albumsArray && albumsArray.slice(0, 10).map(album => (
+                        <Carousel.Item key={album.id}>
+                            <Link to={`/details?identifier=${album.id}&type=${'album'}`}>
+                                <img
+                                    className="d-block w-100"
+                                    src={album.images[0].url}
+                                    alt={album.name}
+                                />
+                            </Link>
+                            <Carousel.Caption>
+                                <h3>{album.name}</h3>
+                                <p>{album.release_date}</p>
+                            </Carousel.Caption>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
+        );
+    };
+
+
+    const renderPlaylistsSection = () => {
+        if (!userPlaylists) return null;
+        if (userPlaylists.length === 0) {
+            return (
+                <p>You have not created any playlists yet.</p>
+            );
+        }
+        return (
+            <>
+                <h3>My Playlists</h3>
+                <Carousel className='user-playlist'>
+                    {userPlaylists.map(playlist => (
+                        <Carousel.Item key={playlist._id}>
+                            <Link to={`/playlists/${playlist._id}`} className="no-underline">
+                                <img src={playlistImages[playlist._id]} alt={playlist.title} className="d-block w-100 custom-image-size" />
+                                <Carousel.Caption>
+                                    <h3>{playlist.title}</h3>
+                                </Carousel.Caption>
+                            </Link>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
+        );
+    };
+
 
     const renderAllPlaylistsSection = () => {
+        if (!allPlaylists) return null;
+        if (allPlaylists.length === 0) {
+            return (
+                <p>No playlists available.</p>
+            );
+        }
         return (
             <div>
-                <h2>All Playlists</h2>
+                <h2>Playlists</h2>
                 <Swiper
                     spaceBetween={20}
-                    slidesPerView={'auto'}
+                    slidesPerView={3}
                     centeredSlides={true}
                     loop={true}
                     coverflowEffect={{
@@ -252,7 +334,6 @@ function Home() {
 
 
     const getImageUrl = (item) => {
-        console.log(item);
         if (!item.details) return '';
 
         switch (item.itemType) {
@@ -267,27 +348,40 @@ function Home() {
         }
     };
     const renderReviewsSection = (reviews) => {
+        if (reviews.length === 0) {
+            return (
+                <p>You have not written any reviews yet.</p>
+            );
+        }
         return (
-            <Carousel>
-                {reviews.map(review => (
-                    <Carousel.Item key={review._id}>
-                        <div className="review-panel d-flex my-reviews">
-                            <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
-                                <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
-                            </Link>
-                            <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
-                                <p className="m-0">
-                                    {review.reviewText.length > 100 ? review.reviewText.slice(0, 100) + '...' : review.reviewText}
-                                </p>
+            <>
+                <h3>My Reviews</h3>
+                <Carousel>
+                    {reviews.map(review => (
+                        <Carousel.Item key={review._id}>
+                            <div className="review-panel d-flex my-reviews">
+                                <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
+                                    <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
+                                </Link>
+                                <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
+                                    <p className="m-0">
+                                        {review.reviewText.length > 100 ? review.reviewText.slice(0, 100) + '...' : review.reviewText}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </Carousel.Item>
-                ))}
-            </Carousel>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
         );
     };
 
     const renderLikedSection = (items, type) => {
+        if (items.length === 0) {
+            return (
+                <p>You have not liked any {type}s yet.</p>
+            );
+        }
         return (
             <Carousel>
                 {items.map(item => (
@@ -303,22 +397,31 @@ function Home() {
 
     return (
         <div>
-            <h2>Home</h2>
             {renderAllPlaylistsSection()}
             {renderLatestReviewsSection()}
             {profile ? (
                 <div className="container">
                     <p>Welcome, {profile.username}!</p>
-                    <div className="row">
-                        <div className="col-md-12">
-                            <h3>My Reviews</h3>
-                            {renderReviewsSection(userReviews)}
+                    {profile.role === "USER" && (
+                        <div className="row">
+                            <div className="col-md-12">
+                                {renderPlaylistsSection()}
+                            </div>
                         </div>
-                    </div>
+                    )}
+                    {profile.role === 'ARTIST' && (
+                        <div className="row">
+                            <div className="col-md-6">
+                                {renderTopTracks()}
+                            </div>
+                            <div className="col-md-6">
+                                {renderAlbums()}
+                            </div>
+                        </div>
+                    )}
                     <div className="row">
                         <div className="col-md-12">
-                            <h3>My Playlists</h3>
-                            {renderPlaylistsSection()}
+                            {renderReviewsSection(userReviews)}
                         </div>
                     </div>
                     <div className="row">

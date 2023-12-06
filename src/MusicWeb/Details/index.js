@@ -123,7 +123,7 @@ function Details() {
         if (accessToken && profile) {
             fetchPlaylists();
         }
-    }, [accessToken, profile]);
+    }, [accessToken, profile])
 
     const handleReviewSubmit = async () => {
         try {
