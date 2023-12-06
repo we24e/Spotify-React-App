@@ -75,3 +75,13 @@ export const addTrackToPlaylist = async (playlistId, trackId) => {
         throw error;
     }
 };
+
+export const deleteTrackFromPlaylist = async (playlistId, trackId) => {
+    try {
+        const response = await axios.put(`${API_BASE_URL}/api/playlists/${playlistId}/delete-track`, { trackId });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting track from playlist:', error);
+        throw error;
+    }
+};
