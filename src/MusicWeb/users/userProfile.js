@@ -14,6 +14,9 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
+import '../Home/index.css';
+import { fetchReviewsByUser } from '../Reviews';
+import * as likes from '../Likes';
 
 function UserProfile() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -25,6 +28,7 @@ function UserProfile() {
     const [artistDetails, setArtistDetails] = useState(null);
     const [playlists, setPlaylists] = useState([]);
     const [playlistImages, setPlaylistImages] = useState({});
+    const [profile, setProfile] = useState(null);
     const navigate = useNavigate();
     const fetchFollowingStatus = async () => {
         try {
@@ -34,6 +38,20 @@ function UserProfile() {
             console.error("Error checking following (Probably not loggedIN):", err);
         }
     };
+
+    const fetchProfile = async () => {
+        try {
+            const profileData = await client.profile();
+            setProfile(profileData);
+        }
+        catch (err) {
+            console.error("Error fetching profile:", err);
+        }
+    };
+    useEffect(() => {
+        fetchProfile();
+    }, []);
+
     const fetchPlaylistImages = async (playlists) => {
         const newImages = {};
         for (const playlist of playlists) {
@@ -82,7 +100,7 @@ function UserProfile() {
         fetchUserPlaylists();
     }, [user, accessToken]);
 
-    
+
     const renderPlaylists = () => {
         if (playlists.length === 0) {
             return <p>No playlists available.</p>;
@@ -92,8 +110,8 @@ function UserProfile() {
             <div className="mt-4">
                 <h3>User Playlists</h3>
                 <Swiper
-                    spaceBetween={15}
-                    slidesPerView={3}
+                    spaceBetween={20}
+                    slidesPerView={2}
                     loop={true}
                     pagination={{
                         clickable: true,
@@ -104,7 +122,7 @@ function UserProfile() {
                     {playlists.map(playlist => (
                         <SwiperSlide key={playlist.id}>
                             <Link to={`/playlists/${playlist._id}`}>
-                            <p className='text-decoration-none text-light text-center bg-dark mb-0'>{playlist.title}</p>
+                                <p className='text-decoration-none text-light text-center bg-dark mb-0'>{playlist.title}</p>
                                 <img
                                     src={playlistImages[playlist._id]}
                                     alt={playlist.title}
@@ -146,6 +164,15 @@ function UserProfile() {
 
     const handleFollow = async () => {
         try {
+            if (!profile) {
+                alert('Please log in first.');
+                navigate("/login");
+                return;
+            }
+            if (profile._id === id) {
+                alert('You cannot follow yourself.');
+                return;
+            }
             if (isFollowing) {
                 await client.unfollowUser(id);
                 setIsFollowing(false);
@@ -213,6 +240,155 @@ function UserProfile() {
             </>
         );
     };
+    const renderUserInfo = () => {
+        if (!profile || !user) {
+            return null;
+        }
+
+        return (
+            <div className="row text-center mt-3">
+                <div className="col-md-4">
+                    <p><strong>Username:</strong> {user.username}</p>
+                </div>
+                <div className="col-md-4">
+                    <p><strong>Name:</strong> {`${user.firstName} ${user.lastName}`}</p>
+                </div>
+                <div className="col-md-4">
+                    <p><strong>Email:</strong> {user.email}</p>
+                </div>
+            </div>
+        );
+    };
+
+    const getImageUrl = (item) => {
+        if (!item.details) return '';
+
+        switch (item.itemType) {
+            case 'album':
+                return item.details.images[0].url;
+            case 'track':
+                return item.details.album.images[0].url;
+            case 'artist':
+                return item.details.images[0].url;
+            default:
+                return '';
+        }
+    };
+
+    const [userReviews, setUserReviews] = useState([]);
+    const [likedAlbums, setLikedAlbums] = useState([]);
+    const [likedTracks, setLikedTracks] = useState([]);
+    const [likedArtists, setLikedArtists] = useState([]);
+
+    const fetchLikedItemsDetails = async (items, type) => {
+        return Promise.all(items.map(async (item) => {
+            const details = await fetchItemDetails(item.itemId, type, accessToken);
+            return { ...item, details };
+        }));
+    };
+
+    const fetchLikedAlbums = async () => {
+        try {
+            const albums = await likes.fetchLikedItems(id, 'album');
+            const albumsDetails = await fetchLikedItemsDetails(albums, 'album');
+            setLikedAlbums(albumsDetails);
+        } catch (error) {
+            console.error("Error fetching liked albums:", error);
+        }
+
+    };
+
+    const fetchLikedTracks = async () => {
+        try {
+            const tracks = await likes.fetchLikedItems(id, 'track');
+            const trackDetails = await fetchLikedItemsDetails(tracks, 'track');
+            setLikedTracks(trackDetails);
+        } catch (error) {
+            console.error("Error fetching liked tracks:", error);
+        }
+    };
+
+    const fetchLikedArtists = async () => {
+        try {
+            const artists = await likes.fetchLikedItems(id, 'artist');
+            const artistsDetails = await fetchLikedItemsDetails(artists, 'artist');
+            setLikedArtists(artistsDetails);
+        } catch (error) {
+            console.error("Error fetching liked artists:", error);
+        }
+    };
+
+    const fetchUserReviews = async () => {
+        if (id) {
+            try {
+                const reviews = await fetchReviewsByUser(id);
+                const reviewsWithDetails = await Promise.all(reviews.map(async review => {
+                    const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
+                    return { ...review, details };
+                }));
+                setUserReviews(reviewsWithDetails);
+            } catch (error) {
+                console.error("Error fetching user reviews:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (id && accessToken) {
+            fetchLikedAlbums();
+            fetchLikedTracks();
+            fetchLikedArtists();
+            fetchUserReviews();
+        }
+    }, [id && accessToken]);
+
+    const renderReviewsSection = (reviews) => {
+        if (reviews.length === 0) {
+            return (
+                <p>The user have not written any reviews yet.</p>
+            );
+        }
+        return (
+            <>
+                <h3>Reviews</h3>
+                <Carousel>
+                    {reviews.map(review => (
+                        <Carousel.Item key={review._id}>
+                            <div className="review-panel d-flex my-reviews">
+                                <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
+                                    <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
+                                </Link>
+                                <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
+                                    <p className="m-0">
+                                        {review.reviewText.length > 100 ? review.reviewText.slice(0, 100) + '...' : review.reviewText}
+                                    </p>
+                                </div>
+                            </div>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
+        );
+    };
+
+    const renderLikedSection = (items, type) => {
+        if (items.length === 0) {
+            return (
+                <p>User haven't liked any {type}s yet.</p>
+            );
+        }
+        return (
+            <Carousel>
+                {items.map(item => (
+                    <Carousel.Item key={item._id}>
+                        <Link to={`/details?identifier=${item.itemId}&type=${type}`} className="no-underline">
+                            <img src={getImageUrl(item)} alt={item.details?.name} className="d-block w-100" />
+                        </Link>
+                    </Carousel.Item>
+                ))}
+            </Carousel>
+        );
+    };
 
     return (
         <>
@@ -251,19 +427,10 @@ function UserProfile() {
                                 <h5>Followers: {user.followers.length}</h5>
                             </div>
                         </div>
-                        {/* User details */}
-                        <div className="row text-center mt-3">
-                            <div className="col-md-4">
-                                <p><strong>Username:</strong> {user.username}</p>
-                            </div>
-                            <div className="col-md-4">
-                                <p><strong>First Name:</strong> {user.firstName}</p>
-                            </div>
-                            <div className="col-md-4">
-                                <p><strong>Last Name:</strong> {user.lastName}</p>
-                            </div>
-                        </div>
-
+                        {renderUserInfo()}
+                        <hr />
+                        {renderReviewsSection(userReviews)}
+                        <hr />
                         {user.role === 'ARTIST' ? (
                             <div className="row mt-4">
                                 <div className="col-md-6">
@@ -273,12 +440,27 @@ function UserProfile() {
                                     {renderAlbums()}
                                 </div>
                             </div>
-                        ): (
+                        ) : (
                             // Render user's playlists if not an artist
                             <div className="mt-4">
                                 {renderPlaylists()}
                             </div>
                         )}
+                        <hr />
+                        <div className="row">
+                            <div className="col-md-4">
+                                <h3>Liked Albums</h3>
+                                {renderLikedSection(likedAlbums, 'album')}
+                            </div>
+                            <div className="col-md-4">
+                                <h3>Liked Tracks</h3>
+                                {renderLikedSection(likedTracks, 'track')}
+                            </div>
+                            <div className="col-md-4">
+                                <h3>Liked Artists</h3>
+                                {renderLikedSection(likedArtists, 'artist')}
+                            </div>
+                        </div>
                     </div>
                 </div>
             ) : (
