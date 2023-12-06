@@ -77,6 +77,7 @@ function Search() {
     const navigate = useNavigate();
     const location = useLocation();
     const [limit, setLimit] = useState(10);
+    const [emptySearchError, setEmptySearchError] = useState('');
 
     useEffect(() => {
         const storedResults = sessionStorage.getItem('searchResults');
@@ -89,6 +90,12 @@ function Search() {
         if (!accessToken) {
             console.error('Access token is not available');
             return;
+        }
+        if (!query.trim()) {
+            setEmptySearchError('Please enter something to search.');
+            return;
+        } else {
+            setEmptySearchError('');
         }
         try {
             const encodedQuery = encodeURIComponent(year ? `${query} year:${year}` : query);
@@ -112,12 +119,17 @@ function Search() {
     };
 
     return (
-        <div className="container-fluid mt-2 ms-0 me-0 p-1">
+        <div className="container-fluid mt-1 ms-0 me-0 p-1">
+            {emptySearchError && (
+                <div className="alert alert-danger m-2" role="alert">
+                    {emptySearchError}
+                </div>
+            )}
             <div className="row align-items-end ms-1 me-1">
                 <div className="col-md-5 mb-1 pe-1 ps-1">
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control universal-bg"
                         placeholder="Search Anything"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
@@ -126,7 +138,7 @@ function Search() {
                 <div className="col-md-2 mb-1 pe-1 ps-1">
                     <input
                         type="text"
-                        className="form-control"
+                        className="form-control universal-bg"
                         placeholder="Year (optional)"
                         value={year}
                         onChange={(e) => setYear(e.target.value)}
@@ -134,7 +146,7 @@ function Search() {
                 </div>
                 <div className="col-md-2 mb-1 pe-1 ps-1">
                     <select
-                        className="form-select"
+                        className="form-select universal-bg"
                         value={type}
                         onChange={(e) => setType(e.target.value)}
                     >
@@ -145,7 +157,7 @@ function Search() {
                 </div>
                 <div className="col-md-1 mb-1 pe-1 ps-1">
                     <select
-                        className="form-select"
+                        className="form-select universal-bg"
                         value={limit}
                         onChange={(e) => setLimit(e.target.value)}
                     >
@@ -156,14 +168,13 @@ function Search() {
                 </div>
                 <div className="col-md-2 mb-1 pe-1 ps-1">
                     <button
-                        className="btn btn-primary w-100"
+                        className="btn btn-secondary w-100"
                         onClick={searchSpotify}
                     >
                         Search
                     </button>
                 </div>
             </div>
-
             {renderResults(results)}
         </div>
     );
