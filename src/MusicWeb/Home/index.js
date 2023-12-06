@@ -6,7 +6,14 @@ import { Carousel } from 'react-bootstrap';
 import { fetchReviewsByUser, fetchLatest5Reviews } from '../Reviews';
 import './index.css';
 import { fetchItemDetails } from '../Search/util';
-import { AccessTokenContext } from '../AccessTokenContext'; 
+import { AccessTokenContext } from '../AccessTokenContext';
+import { fetchPlaylistsByUser, fetchAllPlaylists } from '../Playlists/client';
+import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
 
 function Home() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -60,8 +67,8 @@ function Home() {
             </div>
         );
     };
-    
-    
+
+
 
     const fetchProfile = async () => {
         try {
@@ -86,7 +93,7 @@ function Home() {
             }
         }
     };
-    
+
 
     const fetchLikedAlbums = async () => {
         if (profile) {
@@ -138,6 +145,112 @@ function Home() {
         }
     }, [profile && accessToken]);
 
+    const [allPlaylists, setAllPlaylists] = useState([]);
+    const [userPlaylists, setUserPlaylists] = useState([]);
+    const [playlistImages, setPlaylistImages] = useState({});
+
+    const fetchAllUserPlaylists = async () => {
+        try {
+            // Use the imported function with a different local name
+            const playlists = await fetchAllPlaylists();
+            setAllPlaylists(playlists);
+            fetchPlaylistImages(playlists);
+        } catch (error) {
+            console.error("Error fetching all playlists:", error);
+            setAllPlaylists([]); // Set to empty array in case of error
+        }
+    };
+
+    const fetchUserPlaylists = async () => {
+        try {
+            // Use the imported function with a different local name
+            const playlists = await fetchPlaylistsByUser(profile._id);
+            setUserPlaylists(playlists.filter(pl => pl.trackIDs && pl.trackIDs.length > 0));
+            fetchPlaylistImages(playlists);
+        } catch (error) {
+            console.error("Error fetching user playlists:", error);
+            setUserPlaylists([]); // Set to empty array in case of error
+        }
+    };
+
+    const fetchPlaylistImages = async (playlists) => {
+        try {
+            const images = {};
+            for (const playlist of playlists) {
+                if (playlist.trackIDs && playlist.trackIDs.length > 0) {
+                    const trackDetails = await fetchItemDetails(playlist.trackIDs[0], 'track', accessToken);
+                    images[playlist._id] = trackDetails.album.images[0]?.url || '';
+                }
+            }
+            setPlaylistImages(images);
+        } catch (error) {
+            console.error("Error fetching playlist images:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (profile && accessToken) {
+            fetchUserPlaylists(); // Call the renamed function
+        }
+        fetchAllUserPlaylists(); // Call the renamed function
+    }, [profile, accessToken]);
+
+    const renderPlaylistsSection = () => {
+        return (
+            <Carousel className='user-playlist'>
+                {userPlaylists.map(playlist => (
+                    <Carousel.Item key={playlist._id}>
+                        <Link to={`/playlists/${playlist._id}`} className="no-underline">
+                            <img src={playlistImages[playlist._id]} alt={playlist.title} className="d-block w-100 custom-image-size" />
+                            <Carousel.Caption>
+                                <h3>{playlist.title}</h3>
+                            </Carousel.Caption>
+                        </Link>
+                    </Carousel.Item>
+                ))}
+            </Carousel>
+        );
+    };
+    
+
+    const renderAllPlaylistsSection = () => {
+        return (
+            <div>
+                <h2>All Playlists</h2>
+                <Swiper
+                    spaceBetween={20}
+                    slidesPerView={'auto'}
+                    centeredSlides={true}
+                    loop={true}
+                    coverflowEffect={{
+                        rotate: 0,
+                        stretch: -100,
+                        depth: 200,
+                        modifier: 1,
+                        slideShadows: true,
+                    }}
+                    effect={'coverflow'}
+                    pagination={{
+                        clickable: true,
+                    }}
+                    navigation={true}
+                    modules={[Navigation, Pagination]}
+                    className="mySwiper"
+                >
+                    {allPlaylists.map(playlist => (
+                        <SwiperSlide key={playlist._id}>
+                            <Link to={`/playlists/${playlist._id}`} className="no-underline">
+                                <img src={playlistImages[playlist._id]} alt={playlist.title} className="swiper-slide-image" />
+                                <div className="swiper-caption">{playlist.title}</div>
+                            </Link>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
+            </div>
+        );
+    };
+
+
     const getImageUrl = (item) => {
         console.log(item);
         if (!item.details) return '';
@@ -173,7 +286,7 @@ function Home() {
             </Carousel>
         );
     };
-    
+
     const renderLikedSection = (items, type) => {
         return (
             <Carousel>
@@ -191,6 +304,7 @@ function Home() {
     return (
         <div>
             <h2>Home</h2>
+            {renderAllPlaylistsSection()}
             {renderLatestReviewsSection()}
             {profile ? (
                 <div className="container">
@@ -199,6 +313,12 @@ function Home() {
                         <div className="col-md-12">
                             <h3>My Reviews</h3>
                             {renderReviewsSection(userReviews)}
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col-md-12">
+                            <h3>My Playlists</h3>
+                            {renderPlaylistsSection()}
                         </div>
                     </div>
                     <div className="row">

@@ -5,6 +5,7 @@ import { AccessTokenContext } from '../AccessTokenContext';
 import { likeItem, unlikeItem, checkIfUserLikedItem } from '../Likes';
 import * as client from '../users/client';
 import { fetchReviewsForItem, createReview, fetchReviewsByUser, deleteReview } from '../Reviews';
+import * as playlistClient from '../Playlists/client';
 
 function Details() {
     const location = useLocation();
@@ -21,7 +22,35 @@ function Details() {
     const [reviews, setReviews] = useState([]);
     const [userHasReviewed, setUserHasReviewed] = useState(false);
     const [checkingReview, setCheckingReview] = useState(true);
+    const [playlists, setPlaylists] = useState([]);
+    const [selectedPlaylist, setSelectedPlaylist] = useState('');
     const navigate = useNavigate();
+
+    const fetchPlaylists = async () => {
+        if (profile) {
+            try {
+                const userPlaylists = await playlistClient.fetchPlaylistsByUser(profile._id);
+                setPlaylists(userPlaylists);
+            } catch (error) {
+                console.error('Error fetching playlists:', error);
+            }
+        }
+    };
+
+    const handleAddToPlaylist = async () => {
+        if (!selectedPlaylist) {
+            alert("Please select a playlist.");
+            return;
+        }
+
+        try {
+            await playlistClient.addTrackToPlaylist(selectedPlaylist, identifier);
+            alert("Track added to playlist successfully.");
+        } catch (error) {
+            console.error('Error adding track to playlist:', error);
+        }
+    };
+
     const fetchDetail = async () => {
         if (!accessToken) {
             setError('No access token available');
@@ -90,6 +119,11 @@ function Details() {
             console.error('Error fetching reviews:', error);
         }
     };
+    useEffect(() => {
+        if (accessToken && profile) {
+            fetchPlaylists();
+        }
+    }, [accessToken, profile]);
 
     const handleReviewSubmit = async () => {
         try {
@@ -105,6 +139,25 @@ function Details() {
         } catch (error) {
             console.error('Error submitting review:', error);
         }
+    };
+
+    const renderAddToPlaylistSection = () => {
+        console.log(playlists.length);
+        if (type === 'track' && playlists.length > 0) {
+            return (
+                <div>
+                    <h4>Add to Playlist</h4>
+                    <select value={selectedPlaylist} onChange={(e) => setSelectedPlaylist(e.target.value)}>
+                        <option value="">Select a playlist</option>
+                        {playlists.map(playlist => (
+                            <option key={playlist._id} value={playlist._id}>{playlist.title}</option>
+                        ))}
+                    </select>
+                    <button onClick={handleAddToPlaylist}>Add to Playlist</button>
+                </div>
+            );
+        }
+        return null;
     };
 
     const renderReviews = () => (
@@ -336,6 +389,8 @@ function Details() {
             <button onClick={isLiked ? handleUnlike : handleLike}>
                 {isLiked ? 'Unlike' : 'Like'}
             </button>
+            <h3>Reviews:</h3>
+            {renderAddToPlaylistSection()}
             {renderReviewSection()}
             {renderReviews()}
         </div>
