@@ -1,6 +1,6 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AccessTokenContext } from '../AccessTokenContext';
 
 import "./index.css";
@@ -75,19 +75,16 @@ function Search() {
     const [results, setResults] = useState(null);
     const { accessToken } = useContext(AccessTokenContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const [limit, setLimit] = useState(10);
 
-    // const getAccessToken = async () => {
-    //     try {
-    //         const response = await axios.post('http://localhost:4000/getAccessToken');
-    //         const token = response.data.access_token;
-    //         setAccessToken(token);
-    //         return token;
-    //     } catch (error) {
-    //         console.error('Error fetching access token:', error);
-    //         return null;
-    //     }
-    // };
+    useEffect(() => {
+        const storedResults = sessionStorage.getItem('searchResults');
+        if (storedResults) {
+            setResults(JSON.parse(storedResults));
+        }
+    }, []);
+
     const searchSpotify = async () => {
         if (!accessToken) {
             console.error('Access token is not available');
@@ -107,6 +104,7 @@ function Search() {
                 }
             });
             setResults(response.data);
+            sessionStorage.setItem('searchResults', JSON.stringify(response.data));
             navigate(`/search?criteria=${type}`);
         } catch (error) {
             console.error('Error during search:', error);
