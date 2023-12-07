@@ -475,7 +475,7 @@ function UserProfile() {
     return (
         <>
             {user ? (
-                <div className="card">
+                <div className="card col-md-12">
                     <div className="card-body">
                         {artistDetails ? (
                             <div className="text-center">

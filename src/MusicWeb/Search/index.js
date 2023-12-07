@@ -5,6 +5,7 @@ import { AccessTokenContext } from '../AccessTokenContext';
 import "./test.css";
 import "./index.css";
 import "../randomCss/galaxy.scss";
+import { AiOutlineSearch } from "react-icons/ai";
 
 function renderResults(results) {
     if (!results) return null;
@@ -83,6 +84,18 @@ function renderResults(results) {
     );
 }
 
+function SearchBar({ query, setQuery, placeholder }) {
+    return (
+        <input
+            type="text"
+            className="search-input"
+            placeholder={placeholder}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+        />
+    );
+}
+
 function Search() {
     const [query, setQuery] = useState('');
     const [type, setType] = useState('album');
@@ -138,6 +151,7 @@ function Search() {
         }
     };
 
+
     return (
         <div className="container-fluid mt-1 ms-0 me-0 p-1">
             <div class="animation-wrapper">
@@ -146,59 +160,36 @@ function Search() {
                 <div class="particle particle-3"></div>
                 <div class="particle particle-4"></div>
             </div>
-            {emptySearchError && (
-                <div className="alert alert-danger m-2" role="alert">
-                    {emptySearchError}
-                </div>
-            )}
-            <div className="row align-items-end ms-1 me-1">
-                <div className="col-md-5 mb-1 pe-1 ps-1">
+
+            <div className="search-container mt-3 mb-0">
+                {emptySearchError && (
+                    <div className="alert alert-danger m-2" role="alert">
+                        {emptySearchError}
+                    </div>
+                )}
+                <div className="search-bar">
                     <input
                         type="text"
-                        className="form-control universal-bg"
-                        placeholder="Search Anything"
+                        className="search-input"
+                        placeholder="Search Anything..."
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                     />
-                </div>
-                <div className="col-md-2 mb-1 pe-1 ps-1">
-                    <input
-                        type="text"
-                        className="form-control universal-bg"
-                        placeholder="Year (optional)"
-                        value={year}
-                        onChange={(e) => setYear(e.target.value)}
-                    />
-                </div>
-                <div className="col-md-2 mb-1 pe-1 ps-1">
-                    <select
-                        className="form-select universal-bg"
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
-                    >
-                        <option value="album">Album</option>
-                        <option value="track">Track</option>
-                        <option value="artist">Artist</option>
-                    </select>
-                </div>
-                <div className="col-md-1 mb-1 pe-1 ps-1">
-                    <select
-                        className="form-select universal-bg"
-                        value={limit}
-                        onChange={(e) => setLimit(e.target.value)}
-                    >
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={50}>50</option>
-                    </select>
-                </div>
-                <div className="col-md-2 mb-1 pe-1 ps-1">
-                    <button
-                        className="btn btn-secondary w-100"
-                        onClick={searchSpotify}
-                    >
-                        Search
-                    </button>
+                    <div className="search-controls">
+                        <select className="search-select" value={type} onChange={(e) => setType(e.target.value)}>
+                            <option value="album">Album</option>
+                            <option value="track">Track</option>
+                            <option value="artist">Artist</option>
+                        </select>
+                        <select className="search-select" value={limit} onChange={(e) => setLimit(e.target.value)}>
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                        </select>
+                        <button className="icon-button" onClick={searchSpotify}>
+                            <AiOutlineSearch size={24} />
+                        </button>
+                    </div>
                 </div>
             </div>
             {renderResults(results)}

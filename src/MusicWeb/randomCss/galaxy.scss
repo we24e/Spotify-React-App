@@ -21,25 +21,14 @@ $time-4: 200s;
   border-radius: 50%;
 }
 
-// /* Styles */
-// html, body {
-//   height: 100%;
-// }
-
-// body {
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   font-size: 4rem;
-//   overflow: hidden;
-// }
-
 .page-bg, .animation-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none; 
+  z-index: 1;
 }
 
 .page-bg {
@@ -48,6 +37,10 @@ $time-4: 200s;
   background-size: cover;
   filter: grayscale(100%);
   z-index: -1;
+}
+
+.particle {
+  pointer-events: none;
 }
 
 .particle, .particle:after {

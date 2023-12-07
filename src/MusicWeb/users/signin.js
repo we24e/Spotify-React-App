@@ -30,7 +30,7 @@ function Signin() {
 
   return (
     <section className="d-flex justify-content-center align-items-center min-vh-100">
-            <div class="animation-wrapper">
+      <div class="animation-wrapper">
         <div class="particle particle-1"></div>
         <div class="particle particle-2"></div>
         <div class="particle particle-3"></div>
@@ -41,7 +41,7 @@ function Signin() {
         <div className="content">
           <h2 className="text-center">Sign In</h2>
           <div className="form">
-          {error && <div className="error-message">{error}</div>}
+            {error && <div className="error-message">{error}</div>}
             <div className="inputBox">
               <input
                 type="text"

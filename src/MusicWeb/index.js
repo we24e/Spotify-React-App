@@ -10,7 +10,7 @@ import { AccessTokenProvider } from './AccessTokenContext';
 import Register from './users/signup';
 import Profile from './users/profile';
 import Login from "./users/signin";
-import UserTable from "./users/table";
+import UserTable from "./users/table_backup";
 import UserProfile from './users/userProfile';
 import Playlist from './Playlists';
 import { IoHomeOutline, IoSearchOutline } from 'react-icons/io5';
@@ -68,7 +68,7 @@ function MusicWeb() {
                                 </ul>
                             </nav>
                         </div>
-                        <div className="col-md-12">
+                        <div className="col-md-11">
                             <main >
                                 <Routes>
                                     <Route path="/login" element={<Login />} />
