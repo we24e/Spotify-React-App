@@ -17,6 +17,7 @@ import 'swiper/css/scrollbar';
 import '../Home/index.css';
 import { fetchReviewsByUser } from '../Reviews';
 import * as likes from '../Likes';
+import * as albumClient from '../Albums';
 
 function UserProfile() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -105,7 +106,6 @@ function UserProfile() {
         if (playlists.length === 0) {
             return <p>No playlists available.</p>;
         }
-        console.log(playlists);
         return (
             <div className="mt-4">
                 <h3>User Playlists</h3>
@@ -261,6 +261,10 @@ function UserProfile() {
     };
 
     const getImageUrl = (item) => {
+        if (item.image) {
+            return item.image;
+        }
+
         if (!item.details) return '';
 
         switch (item.itemType) {
@@ -275,6 +279,8 @@ function UserProfile() {
         }
     };
 
+
+
     const [userReviews, setUserReviews] = useState([]);
     const [likedAlbums, setLikedAlbums] = useState([]);
     const [likedTracks, setLikedTracks] = useState([]);
@@ -287,15 +293,34 @@ function UserProfile() {
         }));
     };
 
-    const fetchLikedAlbums = async () => {
+    const fetchAlbumImage = async (albumId) => {
         try {
-            const albums = await likes.fetchLikedItems(id, 'album');
-            const albumsDetails = await fetchLikedItemsDetails(albums, 'album');
-            setLikedAlbums(albumsDetails);
+            const albumDetails = await albumClient.fetchAlbumById(albumId);
+            if (albumDetails && albumDetails.trackIDs && albumDetails.trackIDs.length > 0) {
+                const firstTrackDetails = await fetchItemDetails(albumDetails.trackIDs[0], 'track', accessToken);
+                return firstTrackDetails.album.images[0]?.url || '';
+            }
+            return '';
         } catch (error) {
-            console.error("Error fetching liked albums:", error);
+            console.error('Error fetching album image:', error);
+            return '';
         }
+    };
 
+    const fetchLikedAlbums = async () => {
+        if (id) {
+            try {
+                const albums = await likes.fetchLikedItems(id, 'album');
+                const albumsDetails = await Promise.all(albums.map(async (album) => {
+                    const image = await fetchAlbumImage(album.itemId);
+                    const details = await fetchItemDetails(album.itemId, 'album', accessToken);
+                    return { ...album, details, image };
+                }));
+                setLikedAlbums(albumsDetails);
+            } catch (error) {
+                console.error("Error fetching liked albums:", error);
+            }
+        }
     };
 
     const fetchLikedTracks = async () => {
@@ -324,7 +349,11 @@ function UserProfile() {
                 const reviews = await fetchReviewsByUser(id);
                 const reviewsWithDetails = await Promise.all(reviews.map(async review => {
                     const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
-                    return { ...review, details };
+                    let image = '';
+                    if (review.itemType === 'album') {
+                        image = await fetchAlbumImage(review.itemID);
+                    }
+                    return { ...review, details, image };
                 }));
                 setUserReviews(reviewsWithDetails);
             } catch (error) {
@@ -332,6 +361,8 @@ function UserProfile() {
             }
         }
     };
+
+
 
     useEffect(() => {
         if (id && accessToken) {
@@ -345,18 +376,18 @@ function UserProfile() {
     const renderReviewsSection = (reviews) => {
         if (reviews.length === 0) {
             return (
-                <p>The user have not written any reviews yet.</p>
+                <p>You have not written any reviews yet.</p>
             );
         }
         return (
             <>
-                <h3>Reviews</h3>
+                <h3>My Reviews</h3>
                 <Carousel>
                     {reviews.map(review => (
                         <Carousel.Item key={review._id}>
                             <div className="review-panel d-flex my-reviews">
                                 <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
-                                    <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
+                                    <img src={review.image || getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
                                 </Link>
                                 <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
                                     <p className="m-0">
@@ -377,6 +408,7 @@ function UserProfile() {
                 <p>User haven't liked any {type}s yet.</p>
             );
         }
+        console.log(items);
         return (
             <Carousel>
                 {items.map(item => (
@@ -387,6 +419,56 @@ function UserProfile() {
                     </Carousel.Item>
                 ))}
             </Carousel>
+        );
+    };
+
+    const [customAlbums, setCustomAlbums] = useState([]);
+    const fetchCustomAlbums = async () => {
+        try {
+            const albums = await albumClient.fetchAlbumsByUser(id);
+            const albumsWithDetails = await Promise.all(albums.map(async album => {
+                let image = '';
+                if (album.trackIDs && album.trackIDs.length > 0) {
+                    const firstTrackDetails = await fetchItemDetails(album.trackIDs[0], 'track', accessToken);
+                    image = firstTrackDetails.album.images[0]?.url || '';
+                }
+                return { ...album, image };
+            }));
+            setCustomAlbums(albumsWithDetails);
+        } catch (error) {
+            console.error("Error fetching custom albums:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCustomAlbums();
+    }, [id, accessToken]);
+
+    const renderCustomAlbums = () => {
+        if (!customAlbums || customAlbums.length === 0) {
+            return <p>No custom albums available.</p>;
+        }
+        return (
+            <>
+                <h3>Custom Albums</h3>
+                <Carousel>
+                    {customAlbums.map(album => (
+                        <Carousel.Item key={album._id}>
+                            <Link to={`/details?identifier=${album._id}&type=album`}>
+                                <img
+                                    className="d-block w-100"
+                                    src={album.image}
+                                    alt={album.title}
+                                />
+                            </Link>
+                            <Carousel.Caption>
+                                <h3>{album.title}</h3>
+                                <p>{album.release_date}</p>
+                            </Carousel.Caption>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
         );
     };
 
@@ -433,11 +515,14 @@ function UserProfile() {
                         <hr />
                         {user.role === 'ARTIST' ? (
                             <div className="row mt-4">
-                                <div className="col-md-6">
+                                <div className="col-md-4">
                                     {renderTopTracks()}
                                 </div>
-                                <div className="col-md-6">
+                                <div className="col-md-4">
                                     {renderAlbums()}
+                                </div>
+                                <div className="col-md-4">
+                                    {renderCustomAlbums()}
                                 </div>
                             </div>
                         ) : (

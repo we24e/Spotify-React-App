@@ -125,8 +125,6 @@ function Home() {
         }
     };
 
-
-
     const fetchLikedAlbums = async () => {
         if (profile) {
             try {
