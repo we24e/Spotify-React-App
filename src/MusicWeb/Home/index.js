@@ -14,6 +14,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
+import * as albumClient from '../Albums';
 
 function Home() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -31,48 +32,71 @@ function Home() {
         }));
     };
 
+    const fetchAlbumImage = async (albumId) => {
+        try {
+            const albumDetails = await albumClient.fetchAlbumById(albumId);
+            if (albumDetails && albumDetails.trackIDs && albumDetails.trackIDs.length > 0) {
+                const firstTrackDetails = await fetchItemDetails(albumDetails.trackIDs[0], 'track', accessToken);
+                return firstTrackDetails.album.images[0]?.url || '';
+            }
+            return '';
+        } catch (error) {
+            console.error('Error fetching album image:', error);
+            return '';
+        }
+    };
+
     const fetchLatestReviews = async () => {
         try {
             const reviews = await fetchLatest5Reviews();
             const reviewsWithDetails = await Promise.all(reviews.map(async review => {
-                const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
-                return { ...review, details };
+                let details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
+                let image = '';
+                let albumTitle = '';
+                if (!details && review.itemType === 'album') {
+                    const albumDetails = await albumClient.fetchAlbumById(review.itemID);
+                    if (albumDetails) {
+                        albumTitle = albumDetails.title;
+                        image = await fetchAlbumImage(review.itemID);
+                    }
+                } else if (details && review.itemType === 'album') {
+                    image = details.images[0]?.url;
+                    albumTitle = details.name;
+                }
+                return { ...review, details, image, albumTitle };
             }));
             setLatestReviews(reviewsWithDetails);
         } catch (error) {
             console.error("Error fetching latest reviews:", error);
         }
     };
+
+
     const renderLatestReviewsSection = () => {
         if (latestReviews.length === 0) {
-            return null;
+            return <p>No latest reviews available.</p>;
         }
+    
         return (
             <div className="m-4">
                 <h3>Latest Reviews</h3>
                 <ul className="list-unstyled">
-                    {latestReviews.length > 0 ? (
-                        latestReviews.map(review => (
-                            <li key={review._id} className="d-flex align-items-center mb-2">
-                                <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="text-decoration-none text-dark">
-                                    <img src={getImageUrl(review)} alt="Review" className="img-fluid me-2" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
-                                </Link>
-                                <div>
-                                    <strong className="me-2">{review.details ? review.details.name : 'Unknown Item'}:</strong>
-                                    <span>{review.reviewText.slice(0, 40)}{review.reviewText.length > 40 ? '...' : ''}</span>
-                                </div>
-                            </li>
-                        ))
-                    ) : (
-                        <p>No latest reviews available.</p>
-                    )}
+                    {latestReviews.map(review => (
+                        <li key={review._id} className="d-flex align-items-center mb-2">
+                            <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="text-decoration-none text-dark">
+                                <img src={review.image || getImageUrl(review)} alt="Review" className="img-fluid me-2 mb-1" style={{ width: '60px', height: '60px', objectFit: 'cover' }} />
+                            </Link>
+                            <div className="ms-2">
+                                <strong className="latest-review-text">{review.albumTitle || (review.details ? review.details.name : 'Unknown Item')}</strong>
+                                <span className="latest-review-text">{review.reviewText}</span>
+                            </div>
+                        </li>
+                    ))}
                 </ul>
             </div>
         );
     };
-
-
-
+    
     const fetchProfile = async () => {
         try {
             const profileData = await client.profile();
@@ -88,7 +112,11 @@ function Home() {
                 const reviews = await fetchReviewsByUser(profile._id);
                 const reviewsWithDetails = await Promise.all(reviews.map(async review => {
                     const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
-                    return { ...review, details };
+                    let image = '';
+                    if (review.itemType === 'album') {
+                        image = await fetchAlbumImage(review.itemID);
+                    }
+                    return { ...review, details, image };
                 }));
                 setUserReviews(reviewsWithDetails);
             } catch (error) {
@@ -97,12 +125,15 @@ function Home() {
         }
     };
 
-
     const fetchLikedAlbums = async () => {
         if (profile) {
             try {
                 const albums = await likes.fetchLikedItems(profile._id, 'album');
-                const albumsDetails = await fetchLikedItemsDetails(albums, 'album');
+                const albumsDetails = await Promise.all(albums.map(async (album) => {
+                    const image = await fetchAlbumImage(album.itemId);
+                    const details = await fetchItemDetails(album.itemId, 'album', accessToken);
+                    return { ...album, details, image };
+                }));
                 setLikedAlbums(albumsDetails);
             } catch (error) {
                 console.error("Error fetching liked albums:", error);
@@ -159,7 +190,7 @@ function Home() {
             fetchPlaylistImages(playlists);
         } catch (error) {
             console.error("Error fetching all playlists:", error);
-            setAllPlaylists([]); 
+            setAllPlaylists([]);
         }
     };
 
@@ -191,7 +222,7 @@ function Home() {
 
     useEffect(() => {
         if (profile && accessToken) {
-            fetchUserPlaylists(); 
+            fetchUserPlaylists();
         }
         fetchAllUserPlaylists();
     }, [profile, accessToken]);
@@ -334,6 +365,10 @@ function Home() {
 
 
     const getImageUrl = (item) => {
+        if (item.image) {
+            return item.image;
+        }
+
         if (!item.details) return '';
 
         switch (item.itemType) {
@@ -347,6 +382,7 @@ function Home() {
                 return '';
         }
     };
+
     const renderReviewsSection = (reviews) => {
         if (reviews.length === 0) {
             return (
@@ -361,7 +397,7 @@ function Home() {
                         <Carousel.Item key={review._id}>
                             <div className="review-panel d-flex my-reviews">
                                 <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container flex-shrink-1">
-                                    <img src={getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
+                                    <img src={review.image || getImageUrl(review, review.itemType)} alt="Review" className="review-image" />
                                 </Link>
                                 <div className="review-text-panel d-flex align-items-center justify-content-center flex-grow-1">
                                     <p className="m-0">
@@ -395,10 +431,120 @@ function Home() {
         );
     };
 
+
+    const [customAlbums, setCustomAlbums] = useState([]);
+    const fetchCustomAlbums = async () => {
+        if (profile && profile.role === 'ARTIST') {
+            try {
+                const albums = await albumClient.fetchAlbumsByUser(profile._id);
+                const albumsWithDetails = await Promise.all(albums.map(async album => {
+                    let image = '';
+                    if (album.trackIDs && album.trackIDs.length > 0) {
+                        const firstTrackDetails = await fetchItemDetails(album.trackIDs[0], 'track', accessToken);
+                        image = firstTrackDetails.album.images[0]?.url || '';
+                    }
+                    return { ...album, image };
+                }));
+                setCustomAlbums(albumsWithDetails);
+            } catch (error) {
+                console.error("Error fetching custom albums:", error);
+            }
+        }
+    };
+    useEffect(() => {
+        fetchCustomAlbums();
+    }, [profile, accessToken]);
+    const renderCustomAlbums = () => {
+        if (!customAlbums || customAlbums.length === 0) {
+            return <p>No custom albums available.</p>;
+        }
+
+        return (
+            <>
+                <h3>My Custom Albums</h3>
+                <Carousel>
+                    {customAlbums.map(album => (
+                        <Carousel.Item key={album._id}>
+                            <Link to={`/details?identifier=${album._id}&type=album`}>
+                                <img
+                                    className="d-block w-100"
+                                    src={album.image}
+                                    alt={album.title}
+                                />
+                            </Link>
+                            <Carousel.Caption>
+                                <h3>{album.title}</h3>
+                                <p>{album.release_date}</p>
+                            </Carousel.Caption>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </>
+        );
+    };
+
+    const [allAlbums, setAllAlbums] = useState([]);
+    const fetchAllAlbums = async () => {
+        try {
+            const albums = await albumClient.fetchAllAlbums();
+            const albumsWithDetails = await Promise.all(albums.map(async album => {
+                let image = '';
+                if (album.trackIDs && album.trackIDs.length > 0) {
+                    const firstTrackDetails = await fetchItemDetails(album.trackIDs[0], 'track', accessToken);
+                    image = firstTrackDetails.album.images[0]?.url || '';
+                }
+                return { ...album, image };
+            }));
+            setAllAlbums(albumsWithDetails);
+        } catch (error) {
+            console.error("Error fetching all albums:", error);
+        }
+    };
+    useEffect(() => {
+        fetchAllAlbums();
+    }, []);
+
+    const renderAllAlbumsSection = () => {
+        if (!allAlbums || allAlbums.length === 0) {
+            return <p>No albums available.</p>;
+        }
+
+        return (
+            <div className="m-4">
+                <h3>Latest Albums</h3>
+                <Carousel>
+                    {allAlbums.map(album => (
+                        <Carousel.Item key={album._id}>
+                            <Link to={`/details?identifier=${album._id}&type=album`}>
+                                <img
+                                    className="d-block w-100"
+                                    src={album.image}
+                                    alt={album.title}
+                                />
+                            </Link>
+                            <Carousel.Caption>
+                                <h3>{album.title}</h3>
+                                <p>Release Date: {album.release_date}</p>
+                            </Carousel.Caption>
+                        </Carousel.Item>
+                    ))}
+                </Carousel>
+            </div>
+        );
+    };
+
+
     return (
         <div>
             {renderAllPlaylistsSection()}
-            {renderLatestReviewsSection()}
+            <div className="row">
+                <div className="col-md-6">
+                    {renderLatestReviewsSection()}
+                </div>
+                <div className="col-md-6">
+                    {renderAllAlbumsSection()}
+                </div>
+            </div>
             {profile ? (
                 <div className="container">
                     <p>Welcome, {profile.username}!</p>
@@ -411,11 +557,14 @@ function Home() {
                     )}
                     {profile.role === 'ARTIST' && (
                         <div className="row">
-                            <div className="col-md-6">
+                            <div className="col-md-4">
                                 {renderTopTracks()}
                             </div>
-                            <div className="col-md-6">
+                            <div className="col-md-4">
                                 {renderAlbums()}
+                            </div>
+                            <div className="col-md-4">
+                                {renderCustomAlbums()}
                             </div>
                         </div>
                     )}

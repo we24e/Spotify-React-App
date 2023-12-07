@@ -2,6 +2,7 @@ import * as client from "./client";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import * as playList from "../Playlists/client";
+import * as albumClient from "../Albums";
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -100,6 +101,56 @@ function Profile() {
         loadProfile();
     }, [profile]);
 
+    const [albums, setAlbums] = useState([]);
+    const [newAlbumTitle, setNewAlbumTitle] = useState('');
+    const [newAlbumDescription, setNewAlbumDescription] = useState('');
+    const fetchAlbums = async () => {
+        if (profile && profile._id) {
+            try {
+                const userAlbums = await albumClient.fetchAlbumsByUser(profile._id);
+                setAlbums(userAlbums);
+            } catch (error) {
+                console.error('Error fetching albums:', error);
+                alert("Failed to fetch albums.");
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (profile && profile._id) {
+            fetchAlbums();
+        }
+    }, [profile]);
+
+    const createAlbum = async () => {
+        if (!newAlbumTitle) {
+            alert("Please enter a title for the album.");
+            return;
+        }
+        try {
+            await albumClient.createAlbum(profile._id, newAlbumTitle, newAlbumDescription, []);
+            alert("Album created successfully!");
+            fetchAlbums();
+            setNewAlbumTitle('');
+            setNewAlbumDescription('');
+        } catch (error) {
+            console.error('Error creating album:', error);
+            alert("Failed to create album.");
+        }
+    };
+    const deleteAlbum = async (albumId) => {
+        if (window.confirm("Are you sure you want to delete this album?")) {
+            try {
+                await albumClient.deleteAlbum(albumId);
+                setAlbums(albums.filter(al => al._id !== albumId));
+                alert("Album deleted successfully!");
+            } catch (error) {
+                console.error('Error deleting album:', error);
+                alert("Failed to delete album.");
+            }
+        }
+    };
+
     return (
         <div className="w-50">
             <h1>Profile</h1>
@@ -141,6 +192,40 @@ function Profile() {
                     <br />
                     <button onClick={signout}>Signout</button>
                     <br />
+                    {profile.role === "ARTIST" && (
+                        <>
+                            <div>
+                                <h2>My Custom Albums</h2>
+                                {albums.length > 0 ? (
+                                    <ul>
+                                        {albums.map((album, index) => (
+                                            <li key={album._id}>
+                                                <Link to={`/details?identifier=${album._id}&type=album`} className="no-underline">
+                                                    {album.title} ({album.trackIDs.length} songs)
+                                                </Link>
+                                                <button onClick={() => deleteAlbum(album._id)}>Delete</button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : <p>No albums found.</p>}
+                            </div>
+                            <div>
+                                <label>New Album Title:</label>
+                                <input
+                                    value={newAlbumTitle}
+                                    onChange={(e) => setNewAlbumTitle(e.target.value)}
+                                    placeholder="Enter album title"
+                                />
+                                <label>New Album Description:</label>
+                                <input
+                                    value={newAlbumDescription}
+                                    onChange={(e) => setNewAlbumDescription(e.target.value)}
+                                    placeholder="Enter album description"
+                                />
+                                <button onClick={createAlbum}>Create Album</button>
+                            </div>
+                        </>
+                    )}
                     {profile.role === "USER" && (
                         <>
                             <div>

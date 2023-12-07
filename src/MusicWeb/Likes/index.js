@@ -24,6 +24,10 @@ export const unlikeItem = async (userId, itemId) => {
 
 
 export const checkIfUserLikedItem = async (userId, itemId) => {
+    if (!userId) {
+        console.error("User ID is not loggedIn, skipping like check");
+        return;
+    }
     try {
         const response = await axios.get(`${API_BASE_URL}/api/users/${userId}/likes/check`, { params: { itemId } });
         return response.data;
