@@ -55,3 +55,66 @@
 .audio-preview:not([controls]) {
     display: none;
 }
+.search-container {
+    border-radius: 12px;
+    box-shadow: 0 2px 15px white;
+    margin: auto;
+    max-width: 1000px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: black;
+    border-radius: 10px;
+    padding: 0.6rem;
+    opacity: 90%;
+}
+
+.search-input {
+    color: white !important;
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: none;
+    background-color: transparent !important;
+    font-size: 1rem;
+}
+
+.search-input:focus {
+    outline: none;
+}
+
+.search-controls {
+    display: flex;
+    align-items: center;
+}
+
+.search-select {
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    color: white !important;
+    background-color: transparent;
+    border: none;
+}
+
+.icon-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .search-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-input, .search-select, .icon-button {
+        flex-grow: 1;
+    }
+}
