@@ -79,3 +79,25 @@
 .user-playlist {
     width: 100%;
 }
+
+.latest-review-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    width: 100%;
+    max-width: 230px;
+}
+
+
+@media (max-width: 768px) {
+    .latest-review-text {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    .latest-review-text {
+        max-width: 60px;
+    }
+}

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { AccessTokenContext } from '../AccessTokenContext';
 import { likeItem, unlikeItem, checkIfUserLikedItem } from '../Likes';
 import * as client from '../users/client';
 import { fetchReviewsForItem, createReview, fetchReviewsByUser, deleteReview } from '../Reviews';
 import * as playlistClient from '../Playlists/client';
+import { fetchItemDetails } from '../Search/util';
+import * as albumClient from '../Albums';
 
 function Details() {
     const location = useLocation();
@@ -24,7 +25,12 @@ function Details() {
     const [checkingReview, setCheckingReview] = useState(true);
     const [playlists, setPlaylists] = useState([]);
     const [selectedPlaylist, setSelectedPlaylist] = useState('');
+    const [fromLocalDb, setFromLocalDb] = useState(false);
     const navigate = useNavigate();
+
+    const [isCurrentUserArtist, setIsCurrentUserArtist] = useState(false);
+    const [selectedAlbum, setSelectedAlbum] = useState('');
+    const [artistAlbums, setArtistAlbums] = useState([]);
 
     const fetchPlaylists = async () => {
         if (profile) {
@@ -51,19 +57,53 @@ function Details() {
         }
     };
 
+    const fetchAlbumDetailsFromDB = async (albumId) => {
+        try {
+            return await albumClient.fetchAlbumById(albumId);
+        } catch (error) {
+            console.error('Error fetching album from DB:', error);
+            return null;
+        }
+    };
+
     const fetchDetail = async () => {
-        if (!accessToken) {
+        if (!accessToken || !identifier) {
             setError('No access token available');
             setLoading(false);
             return;
         }
         setLoading(true);
         try {
-            const url = `https://api.spotify.com/v1/${type}s/${identifier}`;
-            const response = await axios.get(url, {
-                headers: { Authorization: `Bearer ${accessToken}` }
-            });
-            setDetail(response.data);
+            let detailData;
+            if (type === 'album') {
+                detailData = await fetchAlbumDetailsFromDB(identifier);
+                if (detailData && detailData.trackIDs) {
+                    setFromLocalDb(true);
+                    const trackDetailsPromises = detailData.trackIDs.map(trackId =>
+                        fetchItemDetails(trackId, "track", accessToken)
+                    );
+                    const tracksDetails = await Promise.all(trackDetailsPromises);
+                    detailData.tracks = { items: tracksDetails };
+                }
+            }
+            if (type === 'track') {
+                if (profile && profile.role === 'ARTIST') {
+                    const trackDetails = await fetchItemDetails(identifier, "track", accessToken);
+                    if (trackDetails && trackDetails.artists && trackDetails.artists.length > 0) {
+                        trackDetails.artists.forEach(artist => {
+                            if (artist.id === profile.artistID) {
+                                console.log(`Match found for artist: ${artist.name}`);
+                                setIsCurrentUserArtist(true);
+                            }
+                        });
+                    }
+                }
+            }
+
+            if (!detailData) {
+                detailData = await fetchItemDetails(identifier, type, accessToken);
+            }
+            setDetail(detailData);
         } catch (err) {
             console.error('Error fetching details:', err);
             setError(err.message);
@@ -72,13 +112,15 @@ function Details() {
         }
     };
 
+
     const fetchProfile = async () => {
         try {
             const profileData = await client.profile();
+            localStorage.setItem('userProfile', JSON.stringify(profileData));
             setProfile(profileData);
             checkIfLiked(profileData._id, identifier);
         } catch (error) {
-            console.error("Error profile (probably not logged in):", error);
+            console.error("Error fetching profile:", error);
         }
     };
 
@@ -103,13 +145,43 @@ function Details() {
     }, [profile, identifier]);
 
     useEffect(() => {
+        fetchProfile();
+    }, []);
+
+    useEffect(() => {
+        const storedProfile = localStorage.getItem('userProfile');
+        if (storedProfile) {
+            setProfile(JSON.parse(storedProfile));
+            checkIfLiked(JSON.parse(storedProfile)._id, identifier);
+        } else {
+            fetchProfile();
+        }
+    }, []);
+    
+    useEffect(() => {
         if (identifier && type && accessToken) {
             fetchDetail();
         }
-        fetchProfile();
         checkUserReview();
         fetchReviews();
     }, [identifier, type, accessToken]);
+
+    const fetchArtistAlbums = async () => {
+        if (profile && profile.role === 'ARTIST') {
+            try {
+                const albums = await albumClient.fetchAlbumsByUser(profile._id);
+                setArtistAlbums(albums);
+            } catch (error) {
+                console.error('Error fetching artist albums:', error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (profile && profile.role === 'ARTIST') {
+            fetchArtistAlbums();
+        }
+    }, [profile]);
 
     const fetchReviews = async () => {
         try {
@@ -142,7 +214,6 @@ function Details() {
     };
 
     const renderAddToPlaylistSection = () => {
-        console.log(playlists.length);
         if (type === 'track' && playlists.length > 0) {
             return (
                 <div>
@@ -229,74 +300,18 @@ function Details() {
             return;
         };
 
-        if (type === 'album' && detail) {
-            const albumDataToLike = {
-                name: detail.name,
-                releaseDate: detail.release_date,
-                label: detail.label,
-                image: detail.images[0].url,
-                tracks: detail.tracks.items.map(track => ({
-                    name: track.name,
-                    duration: track.duration_ms,
-                    previewUrl: track.preview_url,
-                    spotifyLink: track.external_urls.spotify
-                }))
-            };
-
+        if (detail) {
             try {
-                await likeItem(profile._id, identifier, type, detail.name, albumDataToLike);
+                await likeItem(profile._id, identifier, type);
                 setIsLiked(true);
             } catch (err) {
                 console.error('Error liking item:', err);
-            }
-        }
-        else if (type === 'track' && detail) {
-            const trackDataToLike = {
-                name: detail.name,
-                duration: detail.duration_ms,
-                previewUrl: detail.preview_url,
-                spotifyLink: detail.external_urls.spotify,
-                album: {
-                    name: detail.album.name,
-                    releaseDate: detail.album.release_date,
-                    image: detail.album.images[0].url
-                },
-                artists: detail.artists.map(artist => ({
-                    name: artist.name,
-                    // spotifyLink: artist.external_urls.spotify
-                }))
-            };
-
-            try {
-                await likeItem(profile._id, identifier, type, detail.name, trackDataToLike);
-                setIsLiked(true);
-            } catch (err) {
-                console.error('Error liking track:', err);
-            }
-        }
-
-        else if (type === 'artist' && detail) {
-            const artistDataToLike = {
-                name: detail.name,
-                popularity: detail.popularity,
-                genres: detail.genres,
-                followers: detail.followers.total,
-                image: detail.images[0]?.url
-            };
-
-            try {
-                await likeItem(profile._id, identifier, type, detail.name, artistDataToLike);
-                setIsLiked(true);
-            } catch (err) {
-                console.error('Error liking artist:', err);
             }
         }
         else {
             console.error('Error liking item: invalid type or detail');
         }
     };
-
-
 
     const handleUnlike = async () => {
         if (!profile) {
@@ -316,16 +331,57 @@ function Details() {
     if (error) return <div>Error: {error}</div>;
     if (!detail) return <div>No Details Available</div>;
 
+    const handleAddToAlbum = async (albumId) => {
+        try {
+            await albumClient.addTrackToAlbum(albumId, identifier);
+            alert('Track added to album successfully.');
+        } catch (error) {
+            console.error('Error adding track to album:', error);
+        }
+    };
+    const renderAddToAlbumSection = () => {
+        if (isCurrentUserArtist && artistAlbums.length > 0) {
+            return (
+                <div>
+                    <h4>Add to Album</h4>
+                    <select onChange={(e) => setSelectedAlbum(e.target.value)}>
+                        <option value="">Select an album</option>
+                        {artistAlbums.map(album => (
+                            <option key={album._id} value={album._id}>{album.title}</option>
+                        ))}
+                    </select>
+                    <button onClick={() => handleAddToAlbum(selectedAlbum)}>Add to Album</button>
+                </div>
+            );
+        }
+        return null;
+    };
+
     const renderAlbumDetails = () => {
         if (!detail || type !== 'album') return null;
-
+        if (!detail.tracks) {
+            return (
+                <div>
+                    <h3>{detail.title}</h3>
+                    <p>Description: {detail.description}</p>
+                    <p>Release Date: {detail.release_date}</p>
+                    <p>Total Tracks: 0</p>
+                    {detail.images && <img src={detail.images[0].url} alt={detail.name} />}
+                </div>
+            );
+        }
+        const albumName = fromLocalDb ? detail.title : detail.name;
+        const albumImage = fromLocalDb && detail.tracks.items.length > 0
+            ? detail.tracks.items[0].album.images[0].url
+            : detail.images[0].url;
         return (
             <div>
-                <h3>{detail.name}</h3>
+                <h3>{albumName}</h3>
+                <p>Description: {detail.description}</p>
                 <p>Release Date: {detail.release_date}</p>
-                <p>Label: {detail.label}</p>
-                <p>Total Tracks: {detail.total_tracks}</p>
-                {detail.images && <img src={detail.images[0].url} alt={detail.name} />}
+                {!fromLocalDb && <p>Label: {detail.label}</p>}
+                <p>Total Tracks: {detail.tracks.items.length}</p>
+                {albumImage && <img src={albumImage} alt={detail.name} />}
                 <h4>Tracks:</h4>
                 <ul>
                     {detail.tracks.items.map((track, index) => (
@@ -368,7 +424,6 @@ function Details() {
 
     const renderArtistDetails = () => {
         if (!detail || type !== 'artist') return null;
-
         return (
             <div>
                 <h3>{detail.name}</h3>
@@ -391,6 +446,7 @@ function Details() {
             </button>
             <h3>Reviews:</h3>
             {renderAddToPlaylistSection()}
+            {isCurrentUserArtist && renderAddToAlbumSection()}
             {renderReviewSection()}
             {renderReviews()}
         </div>
