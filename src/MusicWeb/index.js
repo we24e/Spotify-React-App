@@ -38,7 +38,7 @@ function MusicWeb() {
                         <Route path="/users" element={<UserTable />} />
                         <Route path="/profile/:id" element={<UserProfile />} />
                         <Route path="/playlists/:playlistId" element={<Playlist />} />
-                        <Route path="*" element={<Navigate to="/login" replace />} />
+                        <Route path="*" element={<Navigate to="/home" replace />} />
                     </Routes>
                 </div>
             </Router>

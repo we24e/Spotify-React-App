@@ -589,7 +589,7 @@ function Home() {
                     </div>
                 </div>
             ) : (
-                <p>Please log in to see your profile information and liked items.</p>
+                <p>Please log in to view more.</p>
             )}
         </div>
     );
