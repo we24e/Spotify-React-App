@@ -1,12 +1,12 @@
 .no-underline {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 
 body {
-    background-color: black !important; 
-    color: #fff !important; 
-    font-family: 'Arial', sans-serif !important; 
+    background-color: black !important;
+    color: #fff !important;
+    font-family: 'Arial', sans-serif !important;
     box-sizing: border-box !important;
 }
 
@@ -16,7 +16,12 @@ body {
     padding: 20px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: #e0e0e0;
 }
 
@@ -42,7 +47,9 @@ button:hover {
     background-color: lightcoral;
 }
 
-input[type="text"], input[type="email"], input[type="password"] {
+input[type="text"],
+input[type="email"],
+input[type="password"] {
     width: 100%;
     border: 1px solid #333;
     background-color: white;
@@ -70,7 +77,6 @@ input[type="text"], input[type="email"], input[type="password"] {
     color: black;
 }
 
-/* Footer */
 footer {
     background-color: #222;
     color: #fff;
@@ -81,9 +87,10 @@ footer {
     width: 100%;
 }
 
-/* Responsive design */
 @media screen and (max-width: 600px) {
-    .container, .navbar a {
+
+    .container,
+    .navbar a {
         width: 100%;
     }
 }

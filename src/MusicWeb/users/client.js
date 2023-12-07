@@ -42,13 +42,17 @@ export const deleteUser = async (user) => {
 
 export const signup = async (credentials) => {
   try {
-    const response = await request.post(`${USERS_API}/signup`, credentials);
-    return response.data;
+      const response = await request.post(`${USERS_API}/signup`, credentials);
+      if (response.status === 200) {
+          return response.data;
+      }
+      throw new Error('Signup failed');
   } catch (error) {
-    console.error(error);
-    throw error;
+      console.error(error);
+      throw error; 
   }
 };
+
 
 export const signout = async () => {
   const response = await request.post(`${USERS_API}/signout`);

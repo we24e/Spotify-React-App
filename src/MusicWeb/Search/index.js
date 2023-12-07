@@ -2,63 +2,78 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AccessTokenContext } from '../AccessTokenContext';
-
+import "./test.css";
 import "./index.css";
+import "../randomCss/galaxy.scss";
 
 function renderResults(results) {
     if (!results) return null;
+    const maxLength = 25;
+    function renderItemCard(item, type, imageUrl, name, displayInfo) {
+        const handleAudioClick = (event) => {
+            event.stopPropagation();
+        };
 
-    function renderItemCard(item, type, imageUrl, name) {
         const renderPreview = () => {
-            if (type === 'track') {
-                if (item.preview_url) {
-                    return (
-                        <audio
-                            controls
-                            src={item.preview_url}
-                            style={{ width: '100%', maxWidth: '100%', marginTop: '10px' }}
-                        >
-                            Your browser does not support the audio element.
-                        </audio>
-                    );
-                } else {
-                    return <p style={{ marginTop: '10px' }}>Preview Not Available</p>;
-                }
+            if (type === 'track' && item.preview_url) {
+                return (
+                    <audio
+                        controls
+                        src={item.preview_url}
+                        style={{ width: '100%', maxWidth: '100%', marginTop: '10px' }}
+                        onClick={handleAudioClick}
+                    >
+                        Your browser does not support the audio element.
+                    </audio>
+                );
+            } else if (type === 'track') {
+                return <p style={{ marginTop: '10px' }}>Preview Not Available</p>;
             }
             return null;
         };
 
         return (
-            <div key={item.id} className="col-md-4 mb-4">
-                <div className="card equal-height-card">
-                    <Link to={`/details?identifier=${item.id}&type=${type}`} className="text-decoration-none text-primary text-center">
-                        <img src={imageUrl} alt={name} className="card-img-top" />
-                        <div className="card-body">
-                            <h5 className="card-title">{name}</h5>
-                            {renderPreview()}
+            <div key={item.id} className="col">
+                <Link to={`/details?identifier=${item.id}&type=${type}`} className="text-decoration-none text-primary">
+                    <div className="card-container">
+                        <div className="overlay"></div>
+                        <div className="overlay"></div>
+                        <div className="overlay"></div>
+                        <div className="overlay"></div>
+                        <div className="card">
+                            <img src={imageUrl} alt={name} className="card-img-top" />
+                            <div className="card-body">
+                                <h4 className="card-title text-start">{truncateText(name, maxLength)}</h4>
+                                <p className="card-text text-start">{truncateText(displayInfo, maxLength)}</p>
+                            </div>
+                            <span className="chev">&rsaquo;</span>
                         </div>
-                    </Link>
-                </div>
+                    </div>
+                </Link>
             </div>
         );
     }
 
 
+    function truncateText(text, maxLength) {
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
 
     const renderAlbums = (albums) => {
-        return albums.items.map(album => renderItemCard(album, 'album', album.images[0]?.url, album.name));
+        return albums.items.map(album => renderItemCard(album, 'album', album.images[0]?.url, album.name, album.artists.map(artist => artist.name).join(', ')));
     };
 
     const renderTracks = (tracks) => {
-        return tracks.items.map(track => renderItemCard(track, 'track', track.album.images[0]?.url, track.name));
+        console.log(tracks);
+        return tracks.items.map(track => renderItemCard(track, 'track', track.album.images[0]?.url, track.name, track.artists.map(artist => artist.name).join(', ')));
     };
 
     const renderArtists = (artists) => {
-        return artists.items.map(artist => renderItemCard(artist, 'artist', artist.images[0]?.url, artist.name));
+        return artists.items.map(artist => renderItemCard(artist, 'artist', artist.images[0]?.url, artist.name, artist.genres.join(', ')));
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container-flex mt-4">
             <div className="row">
                 {results.albums && renderAlbums(results.albums)}
                 {results.tracks && renderTracks(results.tracks)}
@@ -78,6 +93,11 @@ function Search() {
     const location = useLocation();
     const [limit, setLimit] = useState(10);
     const [emptySearchError, setEmptySearchError] = useState('');
+    const [showAdvanced, setShowAdvanced] = useState(false);
+
+    const toggleAdvancedSearch = () => {
+        setShowAdvanced(!showAdvanced);
+    };
 
     useEffect(() => {
         const storedResults = sessionStorage.getItem('searchResults');
@@ -120,6 +140,12 @@ function Search() {
 
     return (
         <div className="container-fluid mt-1 ms-0 me-0 p-1">
+            <div class="animation-wrapper">
+                <div class="particle particle-1"></div>
+                <div class="particle particle-2"></div>
+                <div class="particle particle-3"></div>
+                <div class="particle particle-4"></div>
+            </div>
             {emptySearchError && (
                 <div className="alert alert-danger m-2" role="alert">
                     {emptySearchError}

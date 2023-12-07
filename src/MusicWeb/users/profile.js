@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import * as playList from "../Playlists/client";
 import * as albumClient from "../Albums";
+import '../randomCss/galaxy.scss';
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -154,6 +155,12 @@ function Profile() {
     return (
         <div className="w-50">
             <h1>Profile</h1>
+            <div class="animation-wrapper">
+                <div class="particle particle-1"></div>
+                <div class="particle particle-2"></div>
+                <div class="particle particle-3"></div>
+                <div class="particle particle-4"></div>
+            </div>
             {profile ? (
                 <div>
                     <label>Username: <input value={profile.username} disabled /></label>
