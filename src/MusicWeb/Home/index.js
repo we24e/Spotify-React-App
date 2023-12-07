@@ -15,6 +15,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import * as albumClient from '../Albums';
+import "../randomCss/galaxy.scss";
 
 function Home() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -76,7 +77,7 @@ function Home() {
         if (latestReviews.length === 0) {
             return <p>No latest reviews available.</p>;
         }
-    
+
         return (
             <div className="m-4">
                 <h3>Latest Reviews</h3>
@@ -96,7 +97,7 @@ function Home() {
             </div>
         );
     };
-    
+
     const fetchProfile = async () => {
         try {
             const profileData = await client.profile();
@@ -536,6 +537,12 @@ function Home() {
 
     return (
         <div>
+            <div class="animation-wrapper">
+                <div class="particle particle-1"></div>
+                <div class="particle particle-2"></div>
+                <div class="particle particle-3"></div>
+                <div class="particle particle-4"></div>
+            </div>
             {renderAllPlaylistsSection()}
             <div className="row">
                 <div className="col-md-6">

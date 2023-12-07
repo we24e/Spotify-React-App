@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import * as client from "./client";
-import "./signin.css"; // Import the same CSS as in Signin component
+import "./signin.css";
+import '../randomCss/galaxy.scss';
 
 function Signup() {
   const [error, setError] = useState("");
@@ -18,21 +19,26 @@ function Signup() {
 
   const signup = async () => {
     try {
-        const response = await client.signup(credentials);
-        if (response && response.message === "User created successfully") {
-            navigate("/profile");
-        } else {
-            // Handle the situation where the response is not as expected
-            setError("Unexpected response from server");
-        }
+      const response = await client.signup(credentials);
+      if (response && response.message === "User created successfully") {
+        navigate("/profile");
+      } else {
+        setError("Unexpected response from server");
+      }
     } catch (err) {
-        setError(err.response?.data?.message || "Signup failed");
+      setError(err.response?.data?.message || "Signup failed");
     }
-};
+  };
 
 
   return (
     <section className="d-flex justify-content-center align-items-center min-vh-100">
+      <div class="animation-wrapper">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+      </div>
       <span></span>
       <div className="signin">
         <div className="content">

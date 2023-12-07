@@ -6,13 +6,52 @@
 
 .card-body {
     flex-grow: 1;
+    padding: 10px;
+    overflow: hidden;
 
 }
 
 .card {
     background-color: #bb86fc !important;
+    height: 400px;
+    width: 300px;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-img-top {
+    height: 250px;
+    width: 100%;
+    object-fit: cover;
 }
 
 .card-title {
     color: white !important;
+    font-size: 1.1em;
+    height: 1.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.col {
+    flex: 1;
+    margin: 10px;
+    max-width: 300px;
+}
+
+.audio-preview {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+}
+
+.audio-preview:not([controls]) {
+    display: none;
 }

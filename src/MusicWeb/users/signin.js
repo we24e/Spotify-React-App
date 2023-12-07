@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as client from "./client";
 import "./signin.css";
+import '../randomCss/galaxy.scss';
 
 function Signin() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
@@ -29,6 +30,12 @@ function Signin() {
 
   return (
     <section className="d-flex justify-content-center align-items-center min-vh-100">
+            <div class="animation-wrapper">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+      </div>
       <span></span>
       <div className="signin">
         <div className="content">
