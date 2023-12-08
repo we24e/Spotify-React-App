@@ -7,6 +7,7 @@ import { fetchReviewsForItem, createReview, fetchReviewsByUser, deleteReview } f
 import * as playlistClient from '../Playlists/client';
 import { fetchItemDetails } from '../Search/util';
 import * as albumClient from '../Albums';
+import { Link } from 'react-router-dom';
 
 function Details() {
     const location = useLocation();
@@ -157,7 +158,7 @@ function Details() {
             fetchProfile();
         }
     }, []);
-    
+
     useEffect(() => {
         if (identifier && type && accessToken) {
             fetchDetail();
@@ -236,7 +237,12 @@ function Details() {
             <h4>Reviews:</h4>
             {reviews.map((review, index) => (
                 <div key={index}>
-                    <p>{review.userId.username}: {review.reviewText}</p>
+                    <p>
+                        <Link to={`/profile/${review.userId._id}`} className="no-underline">
+                            {review.userId.username}
+                        </Link>
+                        : {review.reviewText}
+                    </p>
                 </div>
             ))}
         </div>

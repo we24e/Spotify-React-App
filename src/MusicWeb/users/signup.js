@@ -27,6 +27,7 @@ function Signup() {
       const response = await client.signup(credentials);
       if (response && response.message === "User created successfully") {
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('username', credentials.username);
         navigate("/profile");
         window.location.reload();
       } else {

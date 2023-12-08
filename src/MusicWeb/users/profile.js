@@ -195,12 +195,27 @@ function Profile() {
                         </label>
                         {profile.role === "ARTIST" && (
                             <label>Artist ID:
-                                <input disabled
-                                    className="form-control futuristic-input disabled-input"
+                                <input
+                                    className="form-control futuristic-input"
                                     value={profile.artistID || ''}
                                     onChange={(e) => setProfile({ ...profile, artistID: e.target.value })}
                                     name="artistID"
                                 />
+                            </label>
+                        )}
+                        {profile.role === "ADMIN" && (
+                            <label>Timezone:
+                                <select
+                                    value={profile.timezone}
+                                    className="form-control futuristic-input"
+                                    onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}
+                                >
+                                    <option value="EST">Eastern Standard Time (EST)</option>
+                                    <option value="CST">Central Standard Time (CST)</option>
+                                    <option value="MST">Mountain Standard Time (MST)</option>
+                                    <option value="PST">Pacific Standard Time (PST)</option>
+                                    <option value="GMT">Greenwich Mean Time (GMT)</option>
+                                </select>
                             </label>
                         )}
                         <button className="save-button futuristic-button mt-3" onClick={save}>Save</button>

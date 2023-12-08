@@ -18,6 +18,7 @@ function Signin() {
       const response = await client.signin(credentials);
       if (response) {
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('username', credentials.username);
         navigate("/profile");
         window.location.reload();
       }
