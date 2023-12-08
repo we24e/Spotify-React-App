@@ -41,7 +41,7 @@ function renderResults(results) {
                         <div className="overlay"></div>
                         <div className="overlay"></div>
                         <div className="overlay"></div>
-                        <div className="card">
+                        <div className="custom-card">
                             <img src={imageUrl} alt={name} className="card-img-top" />
                             <div className="card-body">
                                 <h4 className="card-title text-start">{truncateText(name, maxLength)}</h4>
