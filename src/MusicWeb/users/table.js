@@ -154,7 +154,6 @@ function UserTable() {
     }
     return (
         <div>
-            <h1>User List</h1>
             {profile && profile.role === "ADMIN" ? <AdminTable /> : <UserTable />}
         </div>
     );

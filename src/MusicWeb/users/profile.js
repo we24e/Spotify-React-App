@@ -98,6 +98,14 @@ function Profile() {
         loadProfile();
     }, [profile]);
 
+    useEffect(() => {
+        const isAuthenticated = localStorage.getItem('isAuthenticated');
+        if (!isAuthenticated) {
+            alert("You must be logged in to view your profile.");
+            navigate('/signin');
+        }
+    }, [navigate]);
+
     const [albums, setAlbums] = useState([]);
     const [newAlbumTitle, setNewAlbumTitle] = useState('');
     const [newAlbumDescription, setNewAlbumDescription] = useState('');
@@ -235,7 +243,7 @@ function Profile() {
 
                         </>
                     )}
-                    {profile.role === "USER" && (
+                    {profile.role !== "ARTIST" && (
                         <>
                             <div className="p-3 m-2 mb-0 new-section">
                                 <h2>My Playlists</h2>
@@ -307,7 +315,7 @@ function Profile() {
                 </div>
             )
                 : (
-                    <h1 className="mt-4" style={{ textAlign: 'center' }}>Please Login to view your Profile.</h1>
+                    <h1 className="mt-4" style={{ textAlign: 'center' }}>Loading your Profile...</h1>
                 )
             }
 
