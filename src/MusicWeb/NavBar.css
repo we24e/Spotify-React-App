@@ -148,12 +148,14 @@ button:focus {
 .signout-button {
     padding: .8em 1.2em;
     background-color: hsl(var(--background-secondary));
-} 
+}
+
 .navbar-bottom {
     position: absolute;
     bottom: 0;
     width: 100%;
 }
+
 /* =======
     Lists
    ======= */
@@ -316,11 +318,13 @@ select {
 #navbar:hover {
     width: 16em;
 }
+
 #navbar:hover .navbar-logo .username {
     display: block;
     margin: 8px;
     font-size: 20px !important;
 }
+
 .navbar-logo .username {
     display: none;
 }
@@ -329,6 +333,7 @@ select {
     transform: scale(0.85);
     padding-left: 0px !important;
 }
+
 .navbar-logo:hover .username {
     display: block;
     margin: 8px;
@@ -554,4 +559,29 @@ select {
     width: 31px;
     height: 31px;
     padding-right: 5px;
+}
+
+.hamburger-menu {
+    display: block;
+    cursor: pointer;
+    font-size: x-large;
+}
+
+@media (max-width: 768px) {
+    .navbar-items {
+        display: none;
+    }
+
+    .hamburger-menu {
+        display: block;
+    }
+
+    .navbar-items.show {
+        display: flex;
+    }
+
+    .mobile-nav {
+        display: flex;
+        flex-direction: column;
+    }
 }
