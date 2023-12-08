@@ -10,7 +10,7 @@ import { AccessTokenProvider } from './AccessTokenContext';
 import Register from './users/signup';
 import Profile from './users/profile';
 import Login from "./users/signin";
-import UserTable from "./users/table_backup";
+import UserTable from "./users/table";
 import UserProfile from './users/userProfile';
 import Playlist from './Playlists';
 import { IoHomeOutline, IoSearchOutline } from 'react-icons/io5';
@@ -26,25 +26,21 @@ import { BiLogOutCircle } from "react-icons/bi"
 function NavBar() {
     const [isUserSignedIn, setIsUserSignedIn] = useState(false);
     const navigate = useNavigate();
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const userProfile = await client.profile();
-                if (userProfile) {
-                    setIsUserSignedIn(true);
-                }
-            } catch (error) {
-                console.error('Error fetching profile:', error);
-            }
-        };
+    const [username, setUsername] = useState('');
 
-        fetchProfile();
+    useEffect(() => {
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) {
+            setUsername(savedUsername);
+            setIsUserSignedIn(true);
+        }
     }, []);
     const handleSignOut = async () => {
         try {
             await client.signout();
             setIsUserSignedIn(false);
             localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('username');
             navigate('/login');
         } catch (error) {
             console.error('Error signing out:', error);
@@ -55,9 +51,10 @@ function NavBar() {
             <nav id="navbar" className="navbar-items" style={{ zIndex: 1000 }}>
                 <ul class="navbar-items flexbox-col">
                     <li className="navbar-logo flexbox-left">
-                        <a className="navbar-item-inner flexbox">
-                            <Logo className="navbar-logo" />
-                        </a>
+                        <Logo className="navbar-logo" />
+                        <span className="navbar-item-inner flexbox username">
+                            {isUserSignedIn ? `Hello, ${username}` : ''}
+                        </span>
                     </li>
 
                     <li className="navbar-item flexbox-left">

@@ -9,6 +9,7 @@ function Signup() {
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
+    role: "USER"
   });
   const [showPassword, setShowPassword] = useState(true);
   const navigate = useNavigate();
@@ -18,10 +19,17 @@ function Signup() {
   };
 
   const signup = async () => {
+    if (!credentials.username || !credentials.password) {
+      setError("Username and Password are required!");
+      return;
+    }
     try {
       const response = await client.signup(credentials);
       if (response && response.message === "User created successfully") {
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('username', credentials.username);
         navigate("/profile");
+        window.location.reload();
       } else {
         setError("Unexpected response from server");
       }
@@ -72,6 +80,22 @@ function Signup() {
                 }
               />
               <i>Password</i>
+            </div>
+            <div className="inputBox">
+              <select
+                value={credentials.role}
+                onChange={(e) =>
+                  setCredentials({
+                    ...credentials,
+                    role: e.target.value,
+                  })
+                }
+                className="form-control"
+              >
+                <option value="USER">Register as User</option>
+                <option value="ARTIST">Register as Artist</option>
+                <option value="ADMIN">Register as Admin</option>
+              </select>
             </div>
             <div className="inputBox">
               <input

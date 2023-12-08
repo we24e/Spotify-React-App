@@ -316,6 +316,25 @@ select {
 #navbar:hover {
     width: 16em;
 }
+#navbar:hover .navbar-logo .username {
+    display: block;
+    margin: 8px;
+    font-size: 20px !important;
+}
+.navbar-logo .username {
+    display: none;
+}
+
+#navbar:hover .navbar-logo {
+    transform: scale(0.85);
+    padding-left: 0px !important;
+}
+.navbar-logo:hover .username {
+    display: block;
+    margin: 8px;
+    font-size: 19px !important;
+}
+
 @media only screen and (min-width: 1200px) {
     #navbar {
         width: 12em;

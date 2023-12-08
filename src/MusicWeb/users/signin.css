@@ -158,6 +158,18 @@ section .signin .content .form .inputBox i {
     cursor: pointer;
 }
 
+.signin .content .form .inputBox select {
+    position: relative;
+    width: 100%;
+    background: #333 !important;
+    padding: 8px 10px;
+    border: none;
+    outline: none;
+    color: #aaa;
+    font-weight: 500;
+}
+
+
 input[type="submit"]:active {
     opacity: 0.6;
 }

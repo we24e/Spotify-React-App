@@ -98,6 +98,14 @@ function Profile() {
         loadProfile();
     }, [profile]);
 
+    useEffect(() => {
+        const isAuthenticated = localStorage.getItem('isAuthenticated');
+        if (!isAuthenticated) {
+            alert("You must be logged in to view your profile.");
+            navigate('/signin');
+        }
+    }, [navigate]);
+
     const [albums, setAlbums] = useState([]);
     const [newAlbumTitle, setNewAlbumTitle] = useState('');
     const [newAlbumDescription, setNewAlbumDescription] = useState('');
@@ -187,12 +195,27 @@ function Profile() {
                         </label>
                         {profile.role === "ARTIST" && (
                             <label>Artist ID:
-                                <input disabled
-                                    className="form-control futuristic-input disabled-input"
+                                <input
+                                    className="form-control futuristic-input"
                                     value={profile.artistID || ''}
                                     onChange={(e) => setProfile({ ...profile, artistID: e.target.value })}
                                     name="artistID"
                                 />
+                            </label>
+                        )}
+                        {profile.role === "ADMIN" && (
+                            <label>Timezone:
+                                <select
+                                    value={profile.timezone}
+                                    className="form-control futuristic-input"
+                                    onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}
+                                >
+                                    <option value="EST">Eastern Standard Time (EST)</option>
+                                    <option value="CST">Central Standard Time (CST)</option>
+                                    <option value="MST">Mountain Standard Time (MST)</option>
+                                    <option value="PST">Pacific Standard Time (PST)</option>
+                                    <option value="GMT">Greenwich Mean Time (GMT)</option>
+                                </select>
                             </label>
                         )}
                         <button className="save-button futuristic-button mt-3" onClick={save}>Save</button>
@@ -235,7 +258,7 @@ function Profile() {
 
                         </>
                     )}
-                    {profile.role === "USER" && (
+                    {profile.role !== "ARTIST" && (
                         <>
                             <div className="p-3 m-2 mb-0 new-section">
                                 <h2>My Playlists</h2>
@@ -307,7 +330,7 @@ function Profile() {
                 </div>
             )
                 : (
-                    <h1 className="mt-4" style={{ textAlign: 'center' }}>Please Login to view your Profile.</h1>
+                    <h1 className="mt-4" style={{ textAlign: 'center' }}>Loading your Profile...</h1>
                 )
             }
 
