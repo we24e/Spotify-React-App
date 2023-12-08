@@ -4,6 +4,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import * as playList from "../Playlists/client";
 import * as albumClient from "../Albums";
 import '../randomCss/galaxy.scss';
+import './profile.css';
 
 function Profile() {
     const [profile, setProfile] = useState(null);
@@ -83,11 +84,6 @@ function Profile() {
         alert("Profile Saved.");
     };
 
-    const signout = async () => {
-        await client.signout();
-        navigate("/login");
-    };
-
     useEffect(() => {
         const loadProfile = async () => {
             if (!profile) {
@@ -153,8 +149,7 @@ function Profile() {
     };
 
     return (
-        <div className="w-50">
-            <h1>Profile</h1>
+        <div className="w-100">
             <div class="animation-wrapper">
                 <div class="particle particle-1"></div>
                 <div class="particle particle-2"></div>
@@ -162,123 +157,127 @@ function Profile() {
                 <div class="particle particle-4"></div>
             </div>
             {profile ? (
-                <div>
-                    <label>Username: <input value={profile.username} disabled /></label>
-                    <label>Password: <input value={profile.password} onChange={(e) => setProfile({ ...profile, password: e.target.value })} /></label>
-                    <label>First Name: <input value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} /></label>
-                    <label>Last Name: <input value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} /></label>
-                    <label>Date of Birth:
-                        <input
-                            type="date"
-                            value={profile.dob ? formatDateForDisplay(profile.dob) : ''}
-                            onChange={(e) => setProfile({ ...profile, dob: formatBackToISO(e.target.value) })}
-                        />
-                    </label>
-                    <label>Email: <input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} /></label>
-                    <br />
-                    <label>Role:
-                        <select value={profile.role} disabled>
-                            <option value="USER">User</option>
-                            <option value="ARTIST">Artist</option>
-                            <option value="ADMIN">Admin</option>
-                        </select>
-                    </label>
-                    {profile.role === "ARTIST" && (
-                        <label>Artist ID:
-                            <input disabled
-                                value={profile.artistID || ''}
-                                onChange={(e) => setProfile({ ...profile, artistID: e.target.value })}
-                                name="artistID"
+                <div className="p-1">
+                    <div className="profile-form futuristic-theme m-2">
+                        <h1 className="future-font">Profile</h1>
+                        <div className="form-grid">
+                            <div className="label">First Name:</div>
+                            <div className="label">Last Name:</div>
+                            <input className="form-control futuristic-input" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} />
+                            <input className="form-control futuristic-input" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} />
+                        </div>
+                        <label>Username: <input className="form-control futuristic-input disabled-input" value={profile.username} disabled /></label>
+                        <label>Password: <input className="form-control futuristic-input" value={profile.password} onChange={(e) => setProfile({ ...profile, password: e.target.value })} /></label>
+
+                        <label>Date of Birth:
+                            <input
+                                type="date"
+                                className="form-control futuristic-input"
+                                value={profile.dob ? formatDateForDisplay(profile.dob) : ''}
+                                onChange={(e) => setProfile({ ...profile, dob: formatBackToISO(e.target.value) })}
                             />
                         </label>
-                    )}
-                    <br />
-                    <br />
-
-                    <button onClick={save}>Save</button>
-                    <br />
-                    <button onClick={signout}>Signout</button>
+                        <label>Email: <input className="form-control futuristic-input" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} /></label>
+                        <label>Role:
+                            <select value={profile.role} className="form-control futuristic-input disabled-input" disabled>
+                                <option value="USER">User</option>
+                                <option value="ARTIST">Artist</option>
+                                <option value="ADMIN">Admin</option>
+                            </select>
+                        </label>
+                        {profile.role === "ARTIST" && (
+                            <label>Artist ID:
+                                <input disabled
+                                    className="form-control futuristic-input disabled-input"
+                                    value={profile.artistID || ''}
+                                    onChange={(e) => setProfile({ ...profile, artistID: e.target.value })}
+                                    name="artistID"
+                                />
+                            </label>
+                        )}
+                        <button className="save-button futuristic-button mt-3" onClick={save}>Save</button>
+                    </div>
                     <br />
                     {profile.role === "ARTIST" && (
                         <>
-                            <div>
+                            <div className="p-3 m-2 mb-0 new-section">
                                 <h2>My Custom Albums</h2>
                                 {albums.length > 0 ? (
-                                    <ul>
+                                    <ul className="profile-playlist mb-0">
                                         {albums.map((album, index) => (
-                                            <li key={album._id}>
+                                            <li className="profile-playlist-items d-flex justify-content-between align-items-center" key={album._id}>
                                                 <Link to={`/details?identifier=${album._id}&type=album`} className="no-underline">
                                                     {album.title} ({album.trackIDs.length} songs)
                                                 </Link>
-                                                <button onClick={() => deleteAlbum(album._id)}>Delete</button>
+                                                <button className="btn btn-danger" onClick={() => deleteAlbum(album._id)}>Delete</button>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : <p>No albums found.</p>}
+                                <div>
+                                    <label className="form-label">New Album Title:</label>
+                                    <input
+                                        value={newAlbumTitle}
+                                        className="form-control futuristic-input"
+                                        onChange={(e) => setNewAlbumTitle(e.target.value)}
+                                        placeholder="Enter album title"
+                                    />
+                                    <label className="form-label mt-1">New Album Description:</label>
+                                    <input
+                                        value={newAlbumDescription}
+                                        className="form-control futuristic-input"
+                                        onChange={(e) => setNewAlbumDescription(e.target.value)}
+                                        placeholder="Enter album description"
+                                    />
+                                    <button className="futuristic-button mt-3 mb-3" onClick={createAlbum}>Create Album</button>
+                                </div>
                             </div>
-                            <div>
-                                <label>New Album Title:</label>
-                                <input
-                                    value={newAlbumTitle}
-                                    onChange={(e) => setNewAlbumTitle(e.target.value)}
-                                    placeholder="Enter album title"
-                                />
-                                <label>New Album Description:</label>
-                                <input
-                                    value={newAlbumDescription}
-                                    onChange={(e) => setNewAlbumDescription(e.target.value)}
-                                    placeholder="Enter album description"
-                                />
-                                <button onClick={createAlbum}>Create Album</button>
-                            </div>
+
                         </>
                     )}
                     {profile.role === "USER" && (
                         <>
-                            <div>
+                            <div className="p-3 m-2 mb-0 new-section">
                                 <h2>My Playlists</h2>
                                 {playlists.length > 0 ? (
-                                    <ul>
+                                    <ul className="profile-playlist mb-0">
                                         {playlists.map((playlist, index) => (
-                                            <li key={playlist._id}>
+                                            <li className="profile-playlist-items d-flex justify-content-between align-items-center" key={playlist._id}>
                                                 <Link to={`/playlists/${playlist._id}`} className="no-underline">
                                                     {playlist.title} ({playlist.trackIDs.length} songs)
                                                 </Link>
-                                                <button onClick={() => deletePlaylist(playlist._id)}>Delete</button>
+                                                <button className="btn btn-danger" onClick={() => deletePlaylist(playlist._id)}>Delete</button>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : <p>No playlists found.</p>}
+                                <div>
+                                    <label className="form-label">New Playlist Title:</label>
+                                    <input
+                                        value={newPlaylistTitle}
+                                        className="form-control futuristic-input"
+                                        onChange={(e) => setNewPlaylistTitle(e.target.value)}
+                                        placeholder="Enter playlist title"
+                                    />
+                                    <button className="futuristic-button mt-3 mb-3" onClick={createPlaylist}>Create Playlist</button>
+                                </div>
                             </div>
-                            <div>
-                                <label>New Playlist Title:</label>
-                                <input
-                                    value={newPlaylistTitle}
-                                    onChange={(e) => setNewPlaylistTitle(e.target.value)}
-                                    placeholder="Enter playlist title"
-                                />
-                                <button onClick={createPlaylist}>Create Playlist</button>
-                            </div>
+
                         </>
                     )}
-                    <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                    <div className="followers-section ">
 
-                        <div>
-                            <div><label>Followers: {followers.length}</label></div>
-                            <button onClick={() => setFollowersCollapsed(!followersCollapsed)}>
+                        <div className="followers">
+                            <h3>Followers: {followers.length}</h3>
+                            <button className="toggle-button" onClick={() => setFollowersCollapsed(!followersCollapsed)}>
                                 {followersCollapsed ? 'Show' : 'Hide'} Followers
                             </button>
                             {!followersCollapsed && (
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Followers</th>
-                                        </tr>
-                                    </thead>
+                                <table className="followers-table">
                                     <tbody>
                                         {followers.map(follower => (
                                             <tr key={follower._id}>
-                                                <td><Link to={`/profile/${follower._id}`} className="no-underline">{follower.username}</Link></td>
+                                                <td><Link to={`/profile/${follower._id}`} className="profile-link">{follower.username}</Link></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -286,23 +285,17 @@ function Profile() {
                             )}
                         </div>
 
-                        <div>
-                            <div><label>Following: {following.length}</label></div>
-
-                            <button onClick={() => setFollowingCollapsed(!followingCollapsed)}>
+                        <div className="following">
+                            <h3>Following: {following.length}</h3>
+                            <button className="toggle-button" onClick={() => setFollowingCollapsed(!followingCollapsed)}>
                                 {followingCollapsed ? 'Show' : 'Hide'} Following
                             </button>
                             {!followingCollapsed && (
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Following</th>
-                                        </tr>
-                                    </thead>
+                                <table className="following-table">
                                     <tbody>
                                         {following.map(followed => (
                                             <tr key={followed._id}>
-                                                <td><Link to={`/profile/${followed._id}`} className="no-underline">{followed.username}</Link></td>
+                                                <td><Link to={`/profile/${followed._id}`} className="profile-link">{followed.username}</Link></td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -310,10 +303,11 @@ function Profile() {
                             )}
                         </div>
                     </div>
+
                 </div>
             )
                 : (
-                    <p>Please Login to view your Profile.</p>
+                    <h1 className="mt-4" style={{ textAlign: 'center' }}>Please Login to view your Profile.</h1>
                 )
             }
 

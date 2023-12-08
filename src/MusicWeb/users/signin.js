@@ -17,7 +17,9 @@ function Signin() {
     try {
       const response = await client.signin(credentials);
       if (response) {
+        localStorage.setItem('isAuthenticated', 'true');
         navigate("/profile");
+        window.location.reload();
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
