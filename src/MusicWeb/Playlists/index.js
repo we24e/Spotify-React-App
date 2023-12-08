@@ -5,6 +5,8 @@ import { fetchItemDetails } from '../Search/util';
 import { AccessTokenContext } from '../AccessTokenContext';
 import * as userClient from '../users/client';
 import { ListGroup, ListGroupItem, Button, Alert, Card } from 'react-bootstrap';
+import './index.css';
+import { RiDeleteBinLine } from "react-icons/ri";
 
 function Playlists() {
     const { playlistId } = useParams();
@@ -16,7 +18,12 @@ function Playlists() {
         try {
             const playlistData = await client.fetchPlaylistById(playlistId);
             setPlaylist(playlistData);
-            fetchTracksDetails(playlistData.trackIDs);
+            const storedTracksDetails = localStorage.getItem(`tracksDetails_${playlistId}`);
+            if (storedTracksDetails) {
+                setTracksDetails(JSON.parse(storedTracksDetails));
+            } else {
+                fetchTracksDetails(playlistData.trackIDs);
+            }
         } catch (error) {
             console.error("Error fetching playlist details:", error);
         }
@@ -28,6 +35,7 @@ function Playlists() {
                 trackIds.map(trackId => fetchItemDetails(trackId, 'track', accessToken))
             );
             setTracksDetails(details);
+            localStorage.setItem(`tracksDetails_${playlistId}`, JSON.stringify(details));
         } catch (error) {
             console.error("Error fetching track details:", error);
         }
@@ -63,44 +71,55 @@ function Playlists() {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="container-fluid p-1 m-0 mt-1">
+                        <div class="animation-wrapper">
+                <div class="particle particle-1"></div>
+                <div class="particle particle-2"></div>
+                <div class="particle particle-3"></div>
+                <div class="particle particle-4"></div>
+            </div>
             {playlist ? (
-                <Card className="playlist-card">
-                    <Card.Header as="h2">PlayList: {playlist.title}</Card.Header>
-                    <ListGroup variant="flush">
+                <div className="playlist-card shadow-sm p-2 mb-2 rounded">
+                    <h2 className="playlist-title">Playlist: {playlist.title}</h2>
+                    <div className="track-list">
                         {tracksDetails.map((track, index) => (
-                            <ListGroupItem key={track.id || index} className="track-item">
-                                <Link to={`/details?identifier=${track.id}&type=track`} style={{ textDecoration: 'none' }}>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h4>{track.name}</h4>
-                                            <p>Artist: {track.artists.map(artist => artist.name).join(', ')}</p>
-                                            <p>Album: {track.album.name}</p>
-                                            <p>Duration: {formatDuration(track.duration_ms)}</p>
-                                            {track.preview_url && (
-                                                <audio controls src={track.preview_url}>
-                                                    Your browser does not support the audio element.
-                                                </audio>
+                            <div key={track.id || index} className="track-item mb-3">
+                                <div className="d-flex align-items-center justify-content-between">
+                                    <div className="d-flex align-items-center">
+                                        <div className="track-image">
+                                            {track.album.images && track.album.images.length > 0 && (
+                                                <img src={track.album.images[0].url} alt={track.album.name} className="img-fluid" />
                                             )}
                                         </div>
-                                        <div>
-                                            {track.album.images && track.album.images.length > 0 && (
-                                                <img src={track.album.images[0].url} alt={track.album.name} style={{ width: '150px', height: 'auto' }} />
-                                            )}
+                                        <div className="track-info">
+                                            <Link to={`/details?identifier=${track.id}&type=track`} className="track-link">
+                                                <h4 className="track-name">{track.name}</h4>
+                                                <p className="track-artist">Artist: {track.artists.map(artist => artist.name).join(', ')}</p>
+                                                <p className="track-album">Album: {track.album.name}</p>
+                                                <p className="track-duration">Duration: {formatDuration(track.duration_ms)}</p>
+                                            </Link>
                                         </div>
                                     </div>
-                                </Link>
-                                {profile && profile._id === playlist.userId && (
-                                    <Button variant="danger" onClick={() => handleDeleteTrack(track.id)}>Delete</Button>
+                                    {profile && profile._id === playlist.userId && (
+                                        <button className="btn btn-danger delete-button" onClick={() => handleDeleteTrack(track.id)}><RiDeleteBinLine /></button>
+                                    )}
+                                </div>
+                                {track.preview_url && (
+                                    <audio controls src={track.preview_url} className="audio-preview w-100">
+                                        Your browser does not support the audio element.
+                                    </audio>
                                 )}
-                            </ListGroupItem> 
+                                <hr className='custom-hr'/>
+                            </div>
                         ))}
-                    </ListGroup>
-                </Card>
+                    </div>
+                </div>
             ) : (
-                <Alert variant="info">Loading playlist...</Alert>
+                <div className="alert alert-info">Loading playlist...</div>
             )}
         </div>
     );
+
+
 }
 export default Playlists;

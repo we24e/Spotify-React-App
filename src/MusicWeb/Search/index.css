@@ -11,7 +11,7 @@
 
 }
 
-.card {
+.custom-card {
     background-color: #bb86fc !important;
     height: 400px;
     width: 300px;
@@ -43,18 +43,6 @@
     max-width: 300px;
 }
 
-.audio-preview {
-    width: 100%;
-    max-width: 100%;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #f8f8f8;
-}
-
-.audio-preview:not([controls]) {
-    display: none;
-}
 .search-container {
     border-radius: 12px;
     box-shadow: 0 2px 15px white;

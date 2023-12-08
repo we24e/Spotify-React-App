@@ -136,11 +136,6 @@ a:visited {
 
 button {
     padding: .8em 1.2em;
-    border: 1px solid hsl(var(--black));
-    background-color: hsl(var(--background));
-    font-size: var(--paragraph);
-    cursor: pointer;
-    outline: none;
 }
 
 button:focus {
@@ -150,6 +145,15 @@ button:focus {
     border: 1px solid transparent;
 }
 
+.signout-button {
+    padding: .8em 1.2em;
+    background-color: hsl(var(--background-secondary));
+} 
+.navbar-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
 /* =======
     Lists
    ======= */
@@ -365,7 +369,8 @@ select {
 
 /* Navbar Items */
 .navbar-item {
-    padding: 0 .5em;
+    /* margin-bottom: 10px; */
+    padding: 0.6rem;
     width: 100%;
     cursor: pointer;
 }
@@ -527,7 +532,7 @@ select {
 @media only screen and (max-width: 496px) {}
 
 .nav-icon {
-    width: 29px;
-    height: 29px;
+    width: 31px;
+    height: 31px;
     padding-right: 5px;
 }
