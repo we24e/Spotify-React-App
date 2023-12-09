@@ -59,39 +59,104 @@
 .mySwiper {
     width: auto;
     height: auto;
+    max-width: 1400px;
+    max-height: 700px;
+    margin: 12 auto;
     padding-top: 50px;
     padding-bottom: 50px;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .mySwiper .swiper-slide {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     text-align: center;
     font-size: 18px;
     width: 35%;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    margin: 10px;
+    overflow: hidden;
 }
 
 .swiper-slide-image {
     width: 120%;
-    height: 120%;
+    height: auto;
+    border-radius: 5px;
     transition: transform 0.3s ease-in-out;
+}
+
+.swiper-caption {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .mySwiper .swiper-slide-active {
     z-index: 1;
     transform: scale(1.25);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
 }
 
 .mySwiper .swiper-slide-next,
 .mySwiper .swiper-slide-prev {
     transform: scale(0.8);
     opacity: 0.6;
+    color: transparent !important;
 }
 
 .mySwiper .swiper-slide-shadow-left,
 .mySwiper .swiper-slide-shadow-right {
     opacity: 0.6;
+}
+
+.mySwiper .swiper-slide:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+    .mySwiper .swiper-slide {
+        width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .mySwiper .swiper-slide {
+        width: 75%;
+    }
+}
+
+@media (min-width: 992px) {
+    .mySwiper .swiper-slide {
+        width: 30%;
+    }
+}
+
+.swiper-pagination-bullet {
+    display: none !important;
+}
+
+.swiper-pagination-bullet-active {
+    opacity: 1 !important;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    color: #fff !important;
+    opacity: 0.8 !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+    opacity: 1 !important;
 }
 
 .user-playlist {
@@ -128,4 +193,116 @@
     .review-text-panel {
         font-size: 1.25em;
     }
+}
+
+
+
+@media (min-width: 800px) {
+    .newalbum-container {
+        max-height: 500px !important;
+    }
+}
+
+@media (max-width: 849px) {
+    .newalbum-container {
+        max-height: 400px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .newalbum-container {
+        max-height: 200px !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .newalbum-container {
+        max-height: 700px !important;
+    }
+}
+
+@media (min-width: 1600px) {
+    .newalbum-container {
+        max-height: 750px !important;
+    }
+}
+
+.newalbum-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+
+    >a {
+        text-decoration: none;
+        color: inherit;
+        flex: 0 0 120px;
+        border-radius: 0.5rem;
+        transition: 0.5s ease-in-out;
+        cursor: pointer;
+        box-shadow: 1px 5px 15px #1e0e3e;
+        position: relative;
+        overflow: hidden;
+        display: block;
+
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+
+        .newalbum {
+            font-size: 1.5rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            opacity: 0;
+            flex-direction: column;
+            height: 100% !important;
+            justify-content: flex-end;
+            background: rgb(2, 2, 46);
+            background: linear-gradient(0deg,
+                    rgba(2, 2, 46, 0.6755077030812324) 0%,
+                    rgba(255, 255, 255, 0) 100%);
+            transform: translatey(100%);
+            transition: opacity 0.5s ease-in-out, transform 0.5s 0.2s;
+            visibility: hidden;
+
+            span {
+                display: block;
+                margin-top: 5px;
+                font-size: 1.2rem;
+            }
+        }
+
+        &:hover {
+            flex: 0 0 500px;
+            box-shadow: 1px 3px 15px #7645d8;
+            transform: translatey(-30px);
+        }
+
+        &:hover .newalbum {
+            opacity: 1;
+            transform: translatey(0%);
+            visibility: visible;
+        }
+    }
+}
+
+.hero-section {
+    color: white;
+    text-align: center;
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
 }

@@ -17,6 +17,8 @@ import 'swiper/css/scrollbar';
 import * as albumClient from '../Albums';
 import "../randomCss/galaxy.scss";
 import "./likes.css";
+import { RiNeteaseCloudMusicLine } from "react-icons/ri";
+import { FcLikePlaceholder } from "react-icons/fc";
 
 function Home() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -83,9 +85,9 @@ function Home() {
         if (latestReviews.length === 0) {
             return <p>No latest reviews available.</p>;
         }
-    
+
         return (
-            <div className="m-4 latest-reviews-container">
+            <div className="latest-reviews-container  mt-4 ms-2">
                 <h3>Latest Reviews</h3>
                 <ul className="list-unstyled">
                     {latestReviews.map(review => (
@@ -103,7 +105,7 @@ function Home() {
             </div>
         );
     };
-    
+
 
     const fetchProfile = async () => {
         try {
@@ -342,7 +344,6 @@ function Home() {
         }
         return (
             <div>
-                <h2>Playlists</h2>
                 <Swiper
                     spaceBetween={20}
                     slidesPerView={3}
@@ -361,8 +362,9 @@ function Home() {
                     }}
                     navigation={true}
                     modules={[Navigation, Pagination]}
-                    className="mySwiper"
+                    className="mySwiper p-2"
                 >
+                    {/* <h2>Playlists</h2> */}
                     {allPlaylists.map(playlist => (
                         <SwiperSlide key={playlist._id}>
                             <Link to={`/playlists/${playlist._id}`} className="no-underline">
@@ -485,7 +487,7 @@ function Home() {
 
         return (
             <>
-                <h3>My Custom Albums</h3>
+                <h3>Custom Albums</h3>
                 <Carousel>
                     {customAlbums.map(album => (
                         <Carousel.Item key={album._id}>
@@ -532,31 +534,45 @@ function Home() {
         if (!allAlbums || allAlbums.length === 0) {
             return <p>No albums available.</p>;
         }
-        const latestAlbums = [...allAlbums].reverse().slice(0, 4); // Get the latest 4 albums
+        const latestAlbums = [...allAlbums].reverse().slice(0, 4);
         return (
-            <div className="album-container m-4">
-                <h3>Latest Albums</h3>
-                <div className="album-list">
+            <>
+                <h3 className='mt-4'>Latest Albums</h3>
+                <div className="newalbum-container pt-2 me-2 mb-2" style={{ display: 'flex', gap: '10px', height: '100%' }}>
                     {latestAlbums.map(album => (
-                        <div className="album-item" key={album._id}>
-                            <Link to={`/details?identifier=${album._id}&type=album`}>
-                                <img
-                                    className="album-image"
-                                    src={album.image}
-                                    alt={album.title}
-                                />
-                            </Link>
-                            <div className="album-info">
-                                <h3>{album.title}</h3>
-                                <p>Release Date: {album.release_date}</p>
+                        <Link
+                            to={`/details?identifier=${album._id}&type=album`}
+                            key={album._id}
+                            style={{ textDecoration: 'none', flex: '1', maxWidth: 'calc(25% - 10px)', height: '100%' }}
+                            className="album-card"
+                        >
+                            <div
+                                className="album-image"
+                                style={{
+                                    backgroundImage: `url(${album.image})`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                    height: '100%',
+                                    transition: 'transform 0.3s ease',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between'
+                                }}
+                            >
+                                <div className="newalbum" style={{ backgroundColor: 'rgba(0,0,0,0.5)', color: 'white', padding: '10px' }}>
+                                    <h4>{album.title}</h4>
+                                    <p>{album.description}</p>
+                                    <p>Release Date: {album.release_date}</p>
+                                </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
-            </div>
+            </>
         );
     };
-    
+
 
     return (
         <div>
@@ -566,44 +582,66 @@ function Home() {
                 <div class="particle particle-3"></div>
                 <div class="particle particle-4"></div>
             </div>
-            {renderAllPlaylistsSection()}
-            <div className="row">
-                <div className="col-md-6">
-                    {renderLatestReviewsSection()}
+            <div className={`hero-section d-none d-md-block`}>
+                <div className="hero-content">
+                    <h1>Welcome to Your Music <RiNeteaseCloudMusicLine/> Universe</h1>
+                    <p>Explore new playlists, tracks, albums, and artists.</p>
                 </div>
+            </div>
+            <h2 className='text-center mb-3'>Playlists</h2>
+            {renderAllPlaylistsSection()}
+
+            <div className="row" style={{ maxWidth: '1700px', maxHeight: '1200px', margin: '0 auto' }}>
                 <div className="col-md-6">
+                    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                        {renderLatestReviewsSection()}
+                    </div>
+                </div>
+                <div className="col-md-6" style={{ margin: '0 auto' }}>
                     {renderAllAlbumsSection()}
                 </div>
             </div>
+
             {profile ? (
                 <div className="home-container m-2 p-2">
                     {profile.role === "USER" && (
-                        <div className="row">
+                        <div className="row m-1">
                             {renderPlaylistsSection()}
                         </div>
                     )}
                     {profile.role === 'ARTIST' && (
                         <div className="row">
-                            <div className="col-md-4">
-                                {renderTopTracks()}
+                            <div className="col-md-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+                                    {renderTopTracks()}
+                                </div>
                             </div>
-                            <div className="col-md-4">
-                                {renderAlbums()}
+                            <div className="col-md-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+                                    {renderAlbums()}
+                                </div>
                             </div>
-                            <div className="col-md-4">
-                                {renderCustomAlbums()}
+                            <div className="col-md-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div style={{ maxWidth: '400px', margin: '0 auto' }}>
+                                    {renderCustomAlbums()}
+                                </div>
                             </div>
                         </div>
                     )}
-                    <h3>Liked Albums</h3>
+
+                    <h3 className='mt-3 text-start'><FcLikePlaceholder />Albums</h3>
                     {renderLikedSection(likedAlbums, 'album')}
-                    <h3>Liked Tracks</h3>
+                    <h3><FcLikePlaceholder />Tracks</h3>
                     {renderLikedSection(likedTracks, 'track')}
-                    <h3>Liked Artists</h3>
+                    <h3><FcLikePlaceholder />Artists</h3>
                     {renderLikedSection(likedArtists, 'artist')}
-                    <div className="row">
-                        {renderReviewsSection(userReviews)}
+                    <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+                            {renderReviewsSection(userReviews)}
+                        </div>
                     </div>
+
+
                 </div>
             ) : (
                 <p>Please log in to view more.</p>

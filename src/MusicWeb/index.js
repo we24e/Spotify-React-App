@@ -23,6 +23,7 @@ import * as client from "./users/client";
 import { useNavigate } from 'react-router-dom';
 import { BiLogOutCircle } from "react-icons/bi"
 import { TiThMenuOutline } from "react-icons/ti";
+import Footer from './Footer';
 
 function NavBar({ menuOpen }) {
     const [isUserSignedIn, setIsUserSignedIn] = useState(false);
@@ -209,6 +210,7 @@ function MusicWeb() {
                                     <Route path="*" element={<Navigate to="/login" replace />} />
                                 </Routes>
                             </main>
+                            <Footer />
                         </div>
                     </div>
                 </div>
