@@ -26,11 +26,20 @@
   background: none;
   border: none;
   cursor: pointer;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.likeButton:hover, .likeButton:focus {
+  background-color: transparent; /* No background change on hover */
+  outline: none; /* Remove focus outline */
+  transform: scale(1.1); /* Optional: scale up the icon a bit on hover */
 }
 
 .likeButton svg {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
+  transition: transform 0.3s
 }
 
 .deleteReviewButton {
@@ -80,11 +89,12 @@
 
 .albumDetailContainer {
   display: flex;
-  align-items: start;
+  align-items: stretch;
+  margin-top: 20px;
 }
 
 .albumImageContainer {
-  max-width: 400px;
+  max-width: 300px;
 }
 
 .albumImage {
@@ -95,25 +105,24 @@
 .albumInfoContainer {
   flex: 2;
   margin-left: 20px;
-}
-
-.albumInfoContainer {
-  flex: 2;
-  margin-left: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically centers the content */
+  justify-content: flex-end; /* Aligns content to the bottom */
 }
 
+.infoBottom {
+  margin-top: auto; /* Pushes the content to the bottom */
+}
+
+
 .albumInfoContainer p:first-child {
-  font-size: 24px;
+  font-size: 55px;
   font-weight: bold;
-  text-align: center; /* Horizontally centers the text */
 }
 
 
 .albumTracksContainer li p:first-child {
-  font-size: 18px; /* Adjust the size as needed */
+  font-size: 18px;
   font-weight: bold;
 }
 
@@ -136,5 +145,47 @@
   margin-left: 20px;
 }
 
-/* Continue with the existing styles for the like button, review section, etc. */
+.audioPlayerContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color:  #bb86fc;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  padding: 0px 0; /* Adjust vertical padding as needed, but keep horizontal padding 0 */
+  z-index: 1000;
+}
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  /* Other styles if necessary */
+}
+
+.trackListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* Add other styles as needed */
+}
+
+
+.playButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s;
+  /* Add other styles as needed */
+}
+
+.playButton:hover, .playButton:focus {
+  background-color: transparent; /* No background change on hover */
+  outline: none; /* Remove focus outline */
+  transform: scale(1.1); /* Optional: scale up the icon a bit on hover */
+}
+.reviewsContainer {
+  /* Adjust the padding or margin as needed based on the height of your play control bar */
+  padding-bottom: 80px;
+}
 

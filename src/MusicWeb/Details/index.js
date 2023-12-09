@@ -10,6 +10,7 @@
     import { Link } from 'react-router-dom';
     import styles from './Details.module.css';
     import { FaHeart, FaRegHeart } from 'react-icons/fa';
+    import { FaPlay } from 'react-icons/fa';
     import "../randomCss/galaxy.scss"
 
 
@@ -33,6 +34,10 @@
         const [fromLocalDb, setFromLocalDb] = useState(false);
         const navigate = useNavigate();
         const [showReviewInput, setShowReviewInput] = useState(false);
+        const [currentTrack, setCurrentTrack] = useState(null);
+        const playTrack = (track) => {
+            setCurrentTrack(track);
+        };
 
 
         const [isCurrentUserArtist, setIsCurrentUserArtist] = useState(false);
@@ -49,6 +54,8 @@
                 }
             }
         };
+
+
 
         const handleAddToPlaylist = async () => {
             if (!selectedPlaylist) {
@@ -118,6 +125,22 @@
                 setLoading(false);
             }
         };
+
+        const renderAlbumTracks = () => {
+            if (!detail || type !== 'album') return null;
+
+            return detail.tracks.items.map((track, index) => (
+                <li key={track.id} className={styles.trackListItem}>
+                    <div className={styles.trackDetails}>
+                        <p>Track {index + 1}: {track.name}</p>
+                    </div>
+                    <button className={styles.playButton} onClick={() => playTrack(track)}>
+                        <FaPlay />
+                    </button>
+                </li>
+            ));
+        };
+
 
 
         const fetchProfile = async () => {
@@ -239,10 +262,10 @@
         };
 
         const renderReviews = () => (
-            <div>
+            <div className={styles.reviewsContainer}>
                 <h4>Reviews:</h4>
                 {reviews.map((review, index) => (
-                    <div key={index}>
+                    <div key={index}    >
                         <p>
                             <Link to={`/profile/${review.userId._id}`} className="no-underline">
                                 {review.userId.username}
@@ -270,7 +293,6 @@
             if (!profile || checkingReview) {
                 return <div>Please login to Add a Review</div>;
             }
-
             if (userHasReviewed) {
                 const userReview = reviews.find(review => review.userId._id === profile?._id);
                 return (
@@ -284,7 +306,7 @@
                 );
             } else {
                 return (
-                    <div>
+                    <div className={styles.reviewContainer}>
                         <button onClick={() => setShowReviewInput(!showReviewInput)} className={styles.writeReviewButton}>
                             {showReviewInput ? 'Hide Input Box' : 'Write a Review'}
                         </button>
@@ -383,6 +405,7 @@
             return null;
         };
 
+
         const renderAlbumDetails = () => {
             if (!detail || type !== 'album') return null;
 
@@ -397,30 +420,31 @@
                             {albumImage && <img src={albumImage} alt={detail.title} className={styles.albumImage} />}
                         </div>
                         <div className={styles.albumInfoContainer}>
-                            <p> {detail.name}</p>
-                            <p>Artist: {detail.artists.map(artist => artist.name).join(', ')}</p>
-                            <p>Description: {detail.description}</p>
-                            <p>Release Date: {detail.release_date}</p>
-                            {/*!fromLocalDb && <p>Label: {detail.label}</p>*/}
-                            <p>Total Tracks: {detail.tracks.items.length}</p>
+                            <div className="infoBottom">
+                                <p>{detail.name}</p>
+                                <p>{detail.artists.map(artist => artist.name).join(', ')} • {detail.release_date} • {detail.tracks.items.length} tracks</p>
+                            </div>
                         </div>
                     </div>
                     <div className={styles.albumTracksContainer}>
-                        <h4>Tracks:</h4>
+                        <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
+                            {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
+                        </button>
                         <ul>
-                            {detail.tracks.items.map((track, index) => (
-                                <li key={track.id}>
-                                    <p>Track {index + 1}: {track.name}</p>
-                                    <p>Duration: {Math.floor(track.duration_ms / 60000)}:{((track.duration_ms % 60000) / 1000).toFixed(0)}</p>
-                                    {track.preview_url && <audio controls src={track.preview_url}>Preview</audio>}
-                                    <a href={track.external_urls.spotify} target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
-                                </li>
-                            ))}
+                            {renderAlbumTracks()}
                         </ul>
                     </div>
+                    {currentTrack && (
+                        <div className={styles.audioPlayerContainer}>
+                            <audio controls autoPlay src={currentTrack.preview_url}>
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    )}
                 </div>
             );
         };
+
 
 
 
@@ -488,12 +512,8 @@
                     <div className="particle particle-4"></div>
                 </div>
             <div>
-                <h2>Details for {type}</h2>
                 {type === 'album' ? renderAlbumDetails() : (type === 'track' ? renderTrackDetails() : renderArtistDetails())}
                 <div className={styles.likeButtonContainer}>
-                    <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
-                        {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
-                    </button>
                 </div>
                 {renderAddToPlaylistSection()}
                 {isCurrentUserArtist && renderAddToAlbumSection()}
