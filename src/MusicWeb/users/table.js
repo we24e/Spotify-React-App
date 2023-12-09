@@ -9,13 +9,25 @@ import styles from "./UserTable.module.css";
 function UserTable() {
     const [users, setUsers] = useState([]);
     const [profile, setProfile] = useState(null);
+    const [error, setError] = useState("");
     const [user, setUser] = useState({ username: "", password: "", role: "USER" });
     const createUser = async () => {
+        console.log(user);
+        if (!user.username || !user.password) {
+            setError("Username and Password are required!");
+            return;
+        }
         try {
-            const newUser = await client.createUser(user);
-            setUsers([newUser, ...users]);
+            const response = await client.createUser(user);
+            if (response && response.message === "User created successfully") {
+                setUsers([response.user, ...users]);
+                setError("");
+                alert("User created successfully");
+            } else {
+                setError("Unexpected response from server");
+            }
         } catch (err) {
-            console.log(err);
+            setError(err.response?.data?.message || "User creation failed");
         }
     };
     const deleteUser = async (user) => {
@@ -37,12 +49,19 @@ function UserTable() {
     };
     const updateUser = async () => {
         try {
-            const status = await client.updateUser(user);
-            setUsers(users.map((u) => (u._id === user._id ? user : u)));
+            const response = await client.updateUser(user);
+            if (response && response.message === "User updated successfully") {
+                setUsers(users.map((u) => (u._id === user._id ? user : u)));
+                setError("");
+                alert("User updated successfully");
+            } else {
+                setError("Unexpected response from server");
+            }
         } catch (err) {
-            console.log(err);
+            setError(err.response?.data?.message || "User update failed");
         }
     };
+
 
     const fetchUsers = async () => {
         const users = await client.findAllUsers();
@@ -64,38 +83,44 @@ function UserTable() {
     }, []);
     const AdminTable = () => {
         return (
-            <div>
+            <div className="table-container">
+                {error && <div className="error-message">{error}</div>}
                 <table className={styles.table}>
                     <thead>
                         <tr>
                             <th>Username</th>
+                            <th>Password</th>
                             <th>First Name</th>
                             <th>Last Name</th>
+                            <th>Role</th>
+                            <th></th>
                         </tr>
                         <tr>
                             <td>
-                                <input value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
-                                <input value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })} />
+                                <input className="table-input form-control" value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })} />
+
                             </td>
                             <td>
-                                <input value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} />
+                                <input className="table-input form-control" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
                             </td>
                             <td>
-                                <input value={user.lastName} onChange={(e) => setUser({ ...user, lastName: e.target.value })} />
+                                <input className="table-input form-control" value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} />
+                            </td>
+                            <td>
+                                <input className="table-input form-control" value={user.lastName} onChange={(e) => setUser({ ...user, lastName: e.target.value })} />
                             </td>
                             <td>
                                 <select value={user.role} onChange={(e) => setUser({ ...user, role: e.target.value })}>
                                     <option value="USER">User</option>
                                     <option value="ADMIN">Admin</option>
-                                    <option value="FACULTY">Faculty</option>
-                                    <option value="STUDENT">Student</option>
+                                    <option value="ARTIST">Artist</option>
                                 </select>
                             </td>
                             <td className="text-nowrap">
                                 <BsFillCheckCircleFill onClick={updateUser}
-                                    className="me-2 text-success fs-1 text" />
+                                    className="update-button button-success me-2 text-success fs-1 text" />
                                 <BsPlusCircleFill onClick={createUser}
-                                    className="text-success fs-1 text" />
+                                    className="update-button button-success text-success fs-1 text" />
                             </td>
                         </tr>
                     </thead>
@@ -103,19 +128,20 @@ function UserTable() {
                         {users.map((user) => (
                             <tr key={user._id}>
                                 <td>
-                                    <Link to={`/profile/${user._id}`}>
+                                    <Link className="table-link" to={`/profile/${user._id}`}>
                                         {user.username}
                                     </Link>
                                 </td>
-                                <td>{user.username}</td>
+                                <td>{user.password}</td>
                                 <td>{user.firstName}</td>
                                 <td>{user.lastName}</td>
+                                <td>{user.role}</td>
                                 <td className="text-nowrap">
 
                                     <button className="btn btn-warning me-2">
                                         <BsPencil onClick={() => selectUser(user)} />
                                     </button>
-                                    <button className="btn btn-danger me-2">
+                                    <button className="update-button btn btn-danger me-2">
                                         <BsTrash3Fill onClick={() => deleteUser(user)} />
                                     </button>
                                 </td>
@@ -128,7 +154,7 @@ function UserTable() {
     }
     const UserTable = () => {
         return (
-            <div>
+            <div className="table-container">
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -141,7 +167,7 @@ function UserTable() {
                         {users.map((user) => (
                             <tr key={user._id}>
                                 <td>
-                                    <Link to={`/profile/${user._id}`} className="no-underline">
+                                    <Link to={`/profile/${user._id}`} className="table-link">
                                         {user.username}
                                     </Link>
                                 </td>

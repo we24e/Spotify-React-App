@@ -1,9 +1,12 @@
 .table {
   width: calc(100%);
-  border-collapse: collapse;
   margin-top: 20px;
-  background-color: dimgrey;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding-left: 10px;
+  color: #FFF;
+  border-radius: 10px; 
+  border-collapse: collapse;
+
+  /* overflow: hidden;  */
 }
 
 .headerTitle {
@@ -14,31 +17,87 @@
 
 th, td {
   text-align: left;
-  padding: 8px;
+  padding: 15px;
 }
 
-th {
-  background-color: #333;
-  color: white;
-}
 
 tr:nth-child(even) {
-  background-color: grey;
+  background-color: rgba(0, 0, 0, 0.1); 
 }
 
 tr:hover {
-  background-color: lightslategrey;
+  background-color: rgba(255, 255, 255, 0.1);
 }
-
-.link {
-  color: #4CAF50;
+td a{
   text-decoration: none;
 }
 
-.link:hover {
+td a:hover {
   text-decoration: underline;
 }
 
 .text-nowrap {
   white-space: nowrap;
+}
+
+.update-button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  background-color: #28a745;
+  color: white;
+}
+
+.update-button:hover {
+  background-color: #0056b3 !important;
+}
+
+.button-danger {
+  background-color: #dc3545 !important;
+  color: white;
+}
+
+input[type="text"], input[type="password"], select {
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, select:focus {
+  outline: none;
+}
+
+.table-input {
+  background-color: black !important;
+  color: inherit;
+  border: none;
+  padding: 8px;
+}
+
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+}
+@media (max-width: 600px) {
+  .table th, .table td {
+    padding: 8px;
+    font-size: 0.7em;
+  }
+}
+
+.table-input:focus {
+  outline: none;
+  border-bottom: 1px solid #ccc;
+}
+
+@media (max-width: 600px) {
+  .button, .icon {
+    padding: 10px;
+    font-size: 1.2em;
+  }
 }
