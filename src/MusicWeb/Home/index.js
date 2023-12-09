@@ -16,6 +16,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import * as albumClient from '../Albums';
 import "../randomCss/galaxy.scss";
+import "./likes.css";
 
 function Home() {
     const { accessToken } = useContext(AccessTokenContext);
@@ -33,17 +34,22 @@ function Home() {
         }));
     };
 
-    const fetchAlbumImage = async (albumId) => {
+    const fetchAlbumImageAndTitle = async (albumId) => {
         try {
             const albumDetails = await albumClient.fetchAlbumById(albumId);
+            let imageUrl = '';
+            let title = albumDetails.title;
             if (albumDetails && albumDetails.trackIDs && albumDetails.trackIDs.length > 0) {
                 const firstTrackDetails = await fetchItemDetails(albumDetails.trackIDs[0], 'track', accessToken);
-                return firstTrackDetails.album.images[0]?.url || '';
+                imageUrl = firstTrackDetails.album.images[0]?.url || albumDetails.images[0]?.url || '';
+            } else {
+                imageUrl = albumDetails.images[0]?.url || '';
             }
-            return '';
+
+            return { imageUrl, title };
         } catch (error) {
-            console.error('Error fetching album image:', error);
-            return '';
+            console.error('Error fetching album image and title:', error);
+            return { imageUrl: '', title: '' };
         }
     };
 
@@ -58,7 +64,7 @@ function Home() {
                     const albumDetails = await albumClient.fetchAlbumById(review.itemID);
                     if (albumDetails) {
                         albumTitle = albumDetails.title;
-                        image = await fetchAlbumImage(review.itemID);
+                        image = (await fetchAlbumImageAndTitle(review.itemID)).imageUrl;
                     }
                 } else if (details && review.itemType === 'album') {
                     image = details.images[0]?.url;
@@ -77,17 +83,17 @@ function Home() {
         if (latestReviews.length === 0) {
             return <p>No latest reviews available.</p>;
         }
-
+    
         return (
-            <div className="m-4">
+            <div className="m-4 latest-reviews-container">
                 <h3>Latest Reviews</h3>
                 <ul className="list-unstyled">
                     {latestReviews.map(review => (
-                        <li key={review._id} className="d-flex align-items-center mb-2">
-                            <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="text-decoration-none text-dark">
-                                <img src={review.image || getImageUrl(review)} alt="Review" className="img-fluid me-2 mb-1" style={{ width: '60px', height: '60px', objectFit: 'cover' }} />
+                        <li key={review._id} className="review-panel d-flex align-items-center mb-2">
+                            <Link to={`/details?identifier=${review.itemID}&type=${review.itemType}`} className="review-image-container">
+                                <img src={review.image || getImageUrl(review)} alt="Review" className="review-image" />
                             </Link>
-                            <div className="ms-2">
+                            <div className="review-text-panel">
                                 <strong className="latest-review-text">{review.albumTitle || (review.details ? review.details.name : 'Unknown Item')}</strong>
                                 <span className="latest-review-text">{review.reviewText}</span>
                             </div>
@@ -97,6 +103,7 @@ function Home() {
             </div>
         );
     };
+    
 
     const fetchProfile = async () => {
         try {
@@ -115,7 +122,7 @@ function Home() {
                     const details = await fetchItemDetails(review.itemID, review.itemType, accessToken);
                     let image = '';
                     if (review.itemType === 'album') {
-                        image = await fetchAlbumImage(review.itemID);
+                        image = (await fetchAlbumImageAndTitle(review.itemID)).imageUrl;
                     }
                     return { ...review, details, image };
                 }));
@@ -131,9 +138,9 @@ function Home() {
             try {
                 const albums = await likes.fetchLikedItems(profile._id, 'album');
                 const albumsDetails = await Promise.all(albums.map(async (album) => {
-                    const image = await fetchAlbumImage(album.itemId);
+                    const { imageUrl, title } = await fetchAlbumImageAndTitle(album.itemId);
                     const details = await fetchItemDetails(album.itemId, 'album', accessToken);
-                    return { ...album, details, image };
+                    return { ...album, details, image: imageUrl, title };
                 }));
                 setLikedAlbums(albumsDetails);
             } catch (error) {
@@ -304,21 +311,26 @@ function Home() {
         return (
             <>
                 <h3>My Playlists</h3>
-                <Carousel className='user-playlist'>
+                <div className="card-container">
                     {userPlaylists.map(playlist => (
-                        <Carousel.Item key={playlist._id}>
-                            <Link to={`/playlists/${playlist._id}`} className="no-underline">
-                                <img src={playlistImages[playlist._id]} alt={playlist.title} className="d-block w-100 custom-image-size" />
-                                <Carousel.Caption>
-                                    <h3>{playlist.title}</h3>
-                                </Carousel.Caption>
+                        <div className="card-item" key={playlist._id}>
+                            <Link to={`/playlists/${playlist._id}`} className="card-link">
+                                <div className="card-image-container">
+                                    <img src={playlistImages[playlist._id]} alt={playlist.title} className="card-image" />
+                                    <div className="card-overlay">
+                                    </div>
+                                </div>
+                                <div className="card-content">
+                                    <h5 className="card-title">{playlist.title}</h5>
+                                </div>
                             </Link>
-                        </Carousel.Item>
+                        </div>
                     ))}
-                </Carousel>
+                </div>
             </>
         );
     };
+
 
 
     const renderAllPlaylistsSection = () => {
@@ -419,19 +431,30 @@ function Home() {
                 <p>You have not liked any {type}s yet.</p>
             );
         }
+        if (type === 'album') {
+            console.log(items);
+        }
         return (
-            <Carousel>
+            <div className="card-container">
                 {items.map(item => (
-                    <Carousel.Item key={item._id}>
-                        <Link to={`/details?identifier=${item.itemId}&type=${type}`} className="no-underline">
-                            <img src={getImageUrl(item)} alt={item.details?.name} className="d-block w-100" />
+                    <div className="card-item" key={item._id}>
+                        <Link to={`/details?identifier=${item.itemId}&type=${type}`} className="card-link">
+                            <div className="card-image-container">
+                                <img src={getImageUrl(item)} alt={item.details?.name || item.title} className="card-image" />
+                                <div className="card-overlay">
+                                    <div className="card-rating">
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="card-content">
+                                <h5 className="card-title">{item.details?.name || item.title}</h5>
+                            </div>
                         </Link>
-                    </Carousel.Item>
+                    </div>
                 ))}
-            </Carousel>
+            </div>
         );
-    };
-
+    }
 
     const [customAlbums, setCustomAlbums] = useState([]);
     const fetchCustomAlbums = async () => {
@@ -509,31 +532,31 @@ function Home() {
         if (!allAlbums || allAlbums.length === 0) {
             return <p>No albums available.</p>;
         }
-
+        const latestAlbums = [...allAlbums].reverse().slice(0, 4); // Get the latest 4 albums
         return (
-            <div className="m-4">
+            <div className="album-container m-4">
                 <h3>Latest Albums</h3>
-                <Carousel>
-                    {allAlbums.map(album => (
-                        <Carousel.Item key={album._id}>
+                <div className="album-list">
+                    {latestAlbums.map(album => (
+                        <div className="album-item" key={album._id}>
                             <Link to={`/details?identifier=${album._id}&type=album`}>
                                 <img
-                                    className="d-block w-100"
+                                    className="album-image"
                                     src={album.image}
                                     alt={album.title}
                                 />
                             </Link>
-                            <Carousel.Caption>
+                            <div className="album-info">
                                 <h3>{album.title}</h3>
                                 <p>Release Date: {album.release_date}</p>
-                            </Carousel.Caption>
-                        </Carousel.Item>
+                            </div>
+                        </div>
                     ))}
-                </Carousel>
+                </div>
             </div>
         );
     };
-
+    
 
     return (
         <div>
@@ -553,13 +576,10 @@ function Home() {
                 </div>
             </div>
             {profile ? (
-                <div className="container">
-                    <p>Welcome, {profile.username}!</p>
+                <div className="home-container m-2 p-2">
                     {profile.role === "USER" && (
                         <div className="row">
-                            <div className="col-md-12">
-                                {renderPlaylistsSection()}
-                            </div>
+                            {renderPlaylistsSection()}
                         </div>
                     )}
                     {profile.role === 'ARTIST' && (
@@ -575,24 +595,14 @@ function Home() {
                             </div>
                         </div>
                     )}
+                    <h3>Liked Albums</h3>
+                    {renderLikedSection(likedAlbums, 'album')}
+                    <h3>Liked Tracks</h3>
+                    {renderLikedSection(likedTracks, 'track')}
+                    <h3>Liked Artists</h3>
+                    {renderLikedSection(likedArtists, 'artist')}
                     <div className="row">
-                        <div className="col-md-12">
-                            {renderReviewsSection(userReviews)}
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-md-4">
-                            <h3>Liked Albums</h3>
-                            {renderLikedSection(likedAlbums, 'album')}
-                        </div>
-                        <div className="col-md-4">
-                            <h3>Liked Tracks</h3>
-                            {renderLikedSection(likedTracks, 'track')}
-                        </div>
-                        <div className="col-md-4">
-                            <h3>Liked Artists</h3>
-                            {renderLikedSection(likedArtists, 'artist')}
-                        </div>
+                        {renderReviewsSection(userReviews)}
                     </div>
                 </div>
             ) : (
