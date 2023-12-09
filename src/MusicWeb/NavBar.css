@@ -306,7 +306,7 @@ select {
 #navbar {
     top: 0;
     padding: 0;
-    width: 5em;
+    width: 8.4%;
     height: 100vh;
     position: fixed;
     background-color: hsl(var(--background-secondary));
@@ -338,18 +338,6 @@ select {
     display: block;
     margin: 8px;
     font-size: 19px !important;
-}
-
-@media only screen and (min-width: 1200px) {
-    #navbar {
-        width: 12em;
-    }
-}
-
-@media only screen and (min-width: 1200px) {
-    #main {
-        margin-left: 12em;
-    }
 }
 
 #navbar::-webkit-scrollbar-track {
