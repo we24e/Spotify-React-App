@@ -3,6 +3,8 @@ import * as client from "./client";
 import { BsFillCheckCircleFill, BsPlusCircleFill } from "react-icons/bs";
 import { BsTrash3Fill, BsPencil } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import "../randomCss/galaxy.scss";
+import styles from "./UserTable.module.css";
 
 function UserTable() {
     const [users, setUsers] = useState([]);
@@ -63,7 +65,7 @@ function UserTable() {
     const AdminTable = () => {
         return (
             <div>
-                <table className="table">
+                <table className={styles.table}>
                     <thead>
                         <tr>
                             <th>Username</th>
@@ -127,7 +129,7 @@ function UserTable() {
     const UserTable = () => {
         return (
             <div>
-                <table className="table">
+                <table className={styles.table}>
                     <thead>
                         <tr>
                             <th>Username</th>
@@ -153,8 +155,17 @@ function UserTable() {
         );
     }
     return (
-        <div>
-            {profile && profile.role === "ADMIN" ? <AdminTable /> : <UserTable />}
+        <div className="galaxy-background">
+            <h1 className={styles.headerTitle}>Users</h1>
+            <div className="animation-wrapper">
+                <div className="particle particle-1"></div>
+                <div className="particle particle-2"></div>
+                <div className="particle particle-3"></div>
+                <div className="particle particle-4"></div>
+            </div>
+            <div className={styles.table}>
+                {profile && profile.role === "ADMIN" ? <AdminTable /> : <UserTable />}
+            </div>
         </div>
     );
 

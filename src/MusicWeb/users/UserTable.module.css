@@ -1,0 +1,44 @@
+.table {
+  width: calc(100%);
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: dimgrey;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.headerTitle {
+  text-align: center;
+  color: white;
+  margin-top: 20px;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #333;
+  color: white;
+}
+
+tr:nth-child(even) {
+  background-color: grey;
+}
+
+tr:hover {
+  background-color: lightslategrey;
+}
+
+.link {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
