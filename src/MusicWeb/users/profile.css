@@ -182,3 +182,94 @@ h3 {
     align-items: center;
     flex-direction: column;
 }
+
+.userprofile-card {
+    background-color: #262a33;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+@media only screen and (max-width: 600px) {
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table-input, .btn, .table-link {
+        font-size: 0.7em;
+    }
+
+    .table th, .table td {
+        padding: 8px;
+    }
+
+    .table .hidden-sm {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .table th, .table td {
+        padding: 6px; /* Even smaller padding */
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .btn, .table-link {
+        font-size: 0.7em; /* Further reduce font size */
+    }
+}
+
+/* For smaller mobile devices */
+@media only screen and (max-width: 480px) {
+    .table th, .table td {
+        padding: 4px; 
+        font-size: 0.6em; 
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .btn {
+        padding: 4px 8px; 
+        font-size: 0.6em;
+    }
+
+    .table-input {
+        font-size: 0.6em; 
+    }
+
+    .table .hidden-xs {
+        display: none; 
+    }
+
+    .form-input-row {
+        flex-direction: column;
+    }
+}
+
+@media only screen and (max-width: 990px) {
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .table-input, .btn, .table-link {
+        font-size: 0.75em;
+    }
+
+    .table th, .table td {
+        padding: 8px;
+    }
+
+    .table .hidden-sm {
+        display: none;
+    }
+}
+
+.table-cell-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

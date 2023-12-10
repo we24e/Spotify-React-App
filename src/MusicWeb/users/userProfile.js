@@ -196,17 +196,13 @@ function UserProfile() {
                 <Carousel>
                     {topTracks.slice(0, 5).map(track => (
                         <Carousel.Item key={track.id}>
-                            <Link to={`/track/${track.id}`}>
+                            <Link to={`/details?identifier=${track.id}&type=${'track'}`}>
                                 <img
                                     className="d-block w-100"
                                     src={track.album.images[0].url}
                                     alt={track.name}
                                 />
                             </Link>
-                            <Carousel.Caption>
-                                <h3>{track.name}</h3>
-                                <p>{track.artists.map(artist => artist.name).join(', ')}</p>
-                            </Carousel.Caption>
                         </Carousel.Item>
                     ))}
                 </Carousel>
@@ -223,7 +219,7 @@ function UserProfile() {
                 <Carousel>
                     {albums.slice(0, 10).map(album => (
                         <Carousel.Item key={album.id}>
-                            <Link to={`/album/${album.id}`}>
+                            <Link to={`/details?identifier=${album.id}&type=${'album'}`}>
                                 <img
                                     className="d-block w-100"
                                     src={album.images[0].url}
@@ -231,8 +227,7 @@ function UserProfile() {
                                 />
                             </Link>
                             <Carousel.Caption>
-                                <h3>{album.name}</h3>
-                                <p>Released on {album.release_date}</p>
+                                <p>{album.release_date}</p>
                             </Carousel.Caption>
                         </Carousel.Item>
                     ))}
@@ -376,7 +371,7 @@ function UserProfile() {
     const renderReviewsSection = (reviews) => {
         if (reviews.length === 0) {
             return (
-                <p>You have not written any reviews yet.</p>
+                <p>User have not written any reviews yet.</p>
             );
         }
         return (
@@ -462,7 +457,6 @@ function UserProfile() {
                                 />
                             </Link>
                             <Carousel.Caption>
-                                <h3>{album.title}</h3>
                                 <p>{album.release_date}</p>
                             </Carousel.Caption>
                         </Carousel.Item>
@@ -475,75 +469,77 @@ function UserProfile() {
     return (
         <>
             {user ? (
-                <div className="card col-md-12">
-                    <div className="card-body">
-                        {artistDetails ? (
-                            <div className="text-center">
-                                <img
-                                    src={artistDetails.images[0].url}
-                                    alt={artistDetails.name}
-                                    className="img-fluid rounded-circle mb-3"
-                                    style={{ maxWidth: "200px" }}
-                                />
-                                <h3>{artistDetails.name}</h3>
-                                <p className="text-muted">Total Followers: {user.followers.length + artistDetails.followers.total}</p>
-                            </div>
-                        ) : (
-                            <div className="text-center">
-                                <FaUserCircle size={200} className="mb-3" />
-                                <h3>{user.username}</h3>
-                            </div>
-                        )}
+                <div className="row justify-content-center userprofile-card">
+                    <div className=" col-md-11">
+                        <div className="card-body">
+                            {artistDetails ? (
+                                <div className="text-center">
+                                    <img
+                                        src={artistDetails.images[0].url}
+                                        alt={artistDetails.name}
+                                        className="img-fluid rounded-circle mb-3"
+                                        style={{ maxWidth: "200px" }}
+                                    />
+                                    <h3>{artistDetails.name}</h3>
+                                    <p className="text-secondary">Total Followers: {user.followers.length + artistDetails.followers.total}</p>
+                                </div>
+                            ) : (
+                                <div className="text-center">
+                                    <FaUserCircle size={200} className="mb-3" />
+                                    <h3>{user.username}</h3>
+                                </div>
+                            )}
 
-                        <div className="text-center mt-3">
-                            <button onClick={handleFollow} className="btn btn-primary">
-                                {isFollowing ? 'Unfollow' : 'Follow'}
-                            </button>
-                        </div>
+                            <div className="text-center mt-3">
+                                <button onClick={handleFollow} className="btn btn-primary">
+                                    {isFollowing ? 'Unfollow' : 'Follow'}
+                                </button>
+                            </div>
 
-                        <div className="row text-center mb-3">
-                            <div className="col-md-6 text-center">
-                                <h5>Following: {user.following.length}</h5>
-                            </div>
-                            <div className="col-md-6 text-center">
-                                <h5>Followers: {user.followers.length}</h5>
-                            </div>
-                        </div>
-                        {renderUserInfo()}
-                        <hr />
-                        {renderReviewsSection(userReviews)}
-                        <hr />
-                        {user.role === 'ARTIST' ? (
-                            <div className="row mt-4">
-                                <div className="col-md-4">
-                                    {renderTopTracks()}
+                            <div className="row text-center mb-3">
+                                <div className="col-md-6 text-center">
+                                    <h5>Following: {user.following.length}</h5>
                                 </div>
-                                <div className="col-md-4">
-                                    {renderAlbums()}
-                                </div>
-                                <div className="col-md-4">
-                                    {renderCustomAlbums()}
+                                <div className="col-md-6 text-center">
+                                    <h5>Followers: {user.followers.length}</h5>
                                 </div>
                             </div>
-                        ) : (
-                            // Render user's playlists if not an artist
-                            <div className="mt-4">
-                                {renderPlaylists()}
-                            </div>
-                        )}
-                        <hr />
-                        <div className="row">
-                            <div className="col-md-4">
-                                <h3>Liked Albums</h3>
-                                {renderLikedSection(likedAlbums, 'album')}
-                            </div>
-                            <div className="col-md-4">
-                                <h3>Liked Tracks</h3>
-                                {renderLikedSection(likedTracks, 'track')}
-                            </div>
-                            <div className="col-md-4">
-                                <h3>Liked Artists</h3>
-                                {renderLikedSection(likedArtists, 'artist')}
+                            {renderUserInfo()}
+                            <hr />
+                            {renderReviewsSection(userReviews)}
+                            <hr />
+                            {user.role === 'ARTIST' ? (
+                                <div className="row mt-4">
+                                    <div className="col-md-4">
+                                        {renderTopTracks()}
+                                    </div>
+                                    <div className="col-md-4">
+                                        {renderAlbums()}
+                                    </div>
+                                    <div className="col-md-4">
+                                        {renderCustomAlbums()}
+                                    </div>
+                                </div>
+                            ) : (
+                                // Render user's playlists if not an artist
+                                <div className="mt-4">
+                                    {renderPlaylists()}
+                                </div>
+                            )}
+                            <hr />
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <h3>Liked Albums</h3>
+                                    {renderLikedSection(likedAlbums, 'album')}
+                                </div>
+                                <div className="col-md-4">
+                                    <h3>Liked Tracks</h3>
+                                    {renderLikedSection(likedTracks, 'track')}
+                                </div>
+                                <div className="col-md-4">
+                                    <h3>Liked Artists</h3>
+                                    {renderLikedSection(likedArtists, 'artist')}
+                                </div>
                             </div>
                         </div>
                     </div>
