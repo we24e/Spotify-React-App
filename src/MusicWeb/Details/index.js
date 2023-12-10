@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import styles from './Details.module.css';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { FaPlay } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import "../randomCss/galaxy.scss"
 
 
@@ -35,6 +36,7 @@ function Details() {
     const navigate = useNavigate();
     const [showReviewInput, setShowReviewInput] = useState(false);
     const [currentTrack, setCurrentTrack] = useState(null);
+
     const playTrack = (track) => {
         setCurrentTrack(track);
     };
@@ -247,14 +249,15 @@ function Details() {
         if (type === 'track' && playlists.length > 0) {
             return (
                 <div>
-                    <h4>Add to Playlist</h4>
                     <select value={selectedPlaylist} onChange={(e) => setSelectedPlaylist(e.target.value)}>
                         <option value="">Select a playlist</option>
                         {playlists.map(playlist => (
                             <option key={playlist._id} value={playlist._id}>{playlist.title}</option>
                         ))}
                     </select>
-                    <button onClick={handleAddToPlaylist}>Add to Playlist</button>
+                    <button onClick={handleAddToPlaylist} className={styles.addToPlaylistButton}>
+                        <FaPlus />
+                    </button>
                 </div>
             );
         }
@@ -481,6 +484,7 @@ function Details() {
                 <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
                     {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
                 </button>
+
                 <div className={styles.previewSection}>
                     <div className={styles.yourReviewContainer}>
                     <p>Preview: {detail.preview_url && (

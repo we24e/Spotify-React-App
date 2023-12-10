@@ -85,6 +85,7 @@
   margin-bottom: 10px;
   margin-left: 20px;
   transition: background-color 0.3s;
+  margin-top: 20px;
 }
 
 .writeReviewButton:hover {
@@ -201,4 +202,23 @@ html, body {
 .spotifyLink {
   text-decoration: none;
   margin-left: 20px;
+}
+
+.add-to-playlist-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #555;
+  padding: 10px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.add-to-playlist-button:hover {
+  color: #000;
+  transform: scale(1.1); 
 }
