@@ -80,8 +80,18 @@ function Profile() {
     };
 
     const save = async () => {
-        await client.updateUser(profile);
-        alert("Profile Saved.");
+        if (!profile.password) {
+            alert("Password cannot be empty.");
+            return;
+        }
+
+        try {
+            await client.updateUser(profile);
+            alert("Profile Saved.");
+        } catch (error) {
+            console.error("Error saving profile:", error);
+            alert("Failed to save profile.");
+        }
     };
 
     useEffect(() => {
