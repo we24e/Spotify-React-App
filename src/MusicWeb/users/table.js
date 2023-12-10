@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as client from "./client";
 import { BsFillCheckCircleFill, BsPlusCircleFill } from "react-icons/bs";
 import { BsTrash3Fill, BsPencil } from "react-icons/bs";
@@ -11,6 +11,11 @@ function UserTable() {
     const [profile, setProfile] = useState(null);
     const [error, setError] = useState("");
     const [user, setUser] = useState({ username: "", password: "", role: "USER" });
+    const usernameRef = useRef(null);
+    const passwordRef = useRef(null);
+    const firstNameRef = useRef(null);
+    const lastNameRef = useRef(null);
+
     const createUser = async () => {
         console.log(user);
         if (!user.username || !user.password) {
@@ -97,17 +102,42 @@ function UserTable() {
                         </tr>
                         <tr>
                             <td>
-                                <input className="table-input form-control" placeholder="username" value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })} />
+                                <input
+                                    ref={usernameRef}
+                                    className="table-input form-control"
+                                    placeholder="username"
+                                    defaultValue={user.username}
+                                    onBlur={() => setUser({ ...user, username: usernameRef.current.value })}
+                                />
+
 
                             </td>
                             <td>
-                                <input className="table-input form-control" placeholder="password" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
+                                <input
+                                    ref={passwordRef}
+                                    className="table-input form-control"
+                                    placeholder="password"
+                                    defaultValue={user.password}
+                                    onBlur={() => setUser({ ...user, password: passwordRef.current.value })}
+                                />
                             </td>
                             <td>
-                                <input className="table-input form-control" placeholder="first name" value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} />
+                                <input
+                                    ref={firstNameRef}
+                                    className="table-input form-control"
+                                    placeholder="first name"
+                                    defaultValue={user.firstName}
+                                    onBlur={() => setUser({ ...user, firstName: firstNameRef.current.value })}
+                                />
                             </td>
                             <td>
-                                <input className="table-input form-control" placeholder="last name" value={user.lastName} onChange={(e) => setUser({ ...user, lastName: e.target.value })} />
+                                <input
+                                    ref={lastNameRef}
+                                    className="table-input form-control"
+                                    placeholder="last name"
+                                    defaultValue={user.lastName}
+                                    onBlur={() => setUser({ ...user, lastName: lastNameRef.current.value })}
+                                />
                             </td>
                             <td>
                                 <select value={user.role} onChange={(e) => setUser({ ...user, role: e.target.value })}>
