@@ -175,3 +175,9 @@ audio::-webkit-media-controls-enclosure {
     margin-top: 15px;
     margin-bottom: 15px;
 }
+
+.container-playlist {
+    margin: 0 !important;
+    border : none !important;
+    padding: 0px !important;
+}

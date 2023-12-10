@@ -320,23 +320,25 @@ select {
 }
 
 #navbar:hover .navbar-logo .username {
-    display: block;
-    margin: 8px;
-    font-size: 20px !important;
+    transition: width 0.3s ease;
+    display: block !important;
 }
 
 .navbar-logo .username {
-    display: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 8px;
+    display: none !important;
 }
 
 #navbar:hover .navbar-logo {
-    transform: scale(0.85);
+    transform: scale(1);
     padding-left: 0px !important;
 }
 
 .navbar-logo:hover .username {
     display: block;
-    margin: 8px;
     font-size: 19px !important;
 }
 
@@ -364,10 +366,13 @@ select {
     width: 100%;
     height: 100%;
     background: hsl(var(--background-secondary-dark));
+    justify-content: center;
 }
 
 .navbar-logo>.navbar-item-inner {
-    width: calc(5rem - 8px);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
 .navbar-logo>.navbar-item-inner:hover {
@@ -377,6 +382,7 @@ select {
 .navbar-logo>.navbar-item-inner>svg {
     height: 2em;
     fill: hsl(var(--white));
+    transition: height 0.3s ease;
 }
 
 /* Navbar Items */

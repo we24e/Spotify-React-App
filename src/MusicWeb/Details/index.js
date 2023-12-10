@@ -13,12 +13,20 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { FaPlay } from 'react-icons/fa';
 import { FaPlus } from 'react-icons/fa';
 import "../randomCss/galaxy.scss"
+import { BiAlbum } from "react-icons/bi";
+import { FaPlayCircle } from 'react-icons/fa';
+import { RiDeleteBin2Line } from "react-icons/ri";
+import { TbPlayerTrackNext } from "react-icons/tb";
+import { BsPerson } from "react-icons/bs";
+import { Carousel } from 'react-bootstrap';
+import { fetchArtistTopTracks } from '../Search/util';
+import { render } from '@testing-library/react';
 
 
 function Details() {
     const location = useLocation();
     const { accessToken } = useContext(AccessTokenContext);
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const identifier = searchParams.get('identifier');
     const type = searchParams.get('type');
     const [detail, setDetail] = useState(null);
@@ -34,13 +42,15 @@ function Details() {
     const [selectedPlaylist, setSelectedPlaylist] = useState('');
     const [fromLocalDb, setFromLocalDb] = useState(false);
     const navigate = useNavigate();
-    const [showReviewInput, setShowReviewInput] = useState(false);
     const [currentTrack, setCurrentTrack] = useState(null);
-
+    const [playingTrackId, setPlayingTrackId] = useState(null);
     const playTrack = (track) => {
-        setCurrentTrack(track);
+        if (playingTrackId === track.id) {
+            setPlayingTrackId(null);
+        } else {
+            setPlayingTrackId(track.id);
+        }
     };
-
 
     const [isCurrentUserArtist, setIsCurrentUserArtist] = useState(false);
     const [selectedAlbum, setSelectedAlbum] = useState('');
@@ -134,16 +144,31 @@ function Details() {
         return detail.tracks.items.map((track, index) => (
             <li key={track.id} className={styles.trackListItem}>
                 <div className={styles.trackDetails}>
-                    <p>Track {index + 1}: {track.name}</p>
+                    <p>{index + 1}: {track.name}</p>
+                    <p className={styles.trackArtists}>
+                        {track.artists.map(artist => artist.name).join(', ')}
+                    </p>
                 </div>
                 <button className={styles.playButton} onClick={() => playTrack(track)}>
+                    <span className='me-4'>{formatDuration(track.duration_ms)}</span>
                     <FaPlay />
                 </button>
+                {playingTrackId === track.id && (
+                    <div className={styles.audioPlayerContainer}>
+                        <audio controls autoPlay src={track.preview_url}>
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                )}
             </li>
         ));
     };
 
-
+    const formatDuration = (ms) => {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = ((ms % 60000) / 1000).toFixed(0);
+        return `${minutes}:${seconds.padStart(2, '0')}`;
+    };
 
     const fetchProfile = async () => {
         try {
@@ -215,6 +240,13 @@ function Details() {
         }
     }, [profile]);
 
+    const [topTracks, setTopTracks] = useState([]);
+    useEffect(() => {
+        if (detail && type === 'artist') {
+            fetchArtistTopTracks(identifier, "US", accessToken).then(setTopTracks);
+        }
+    }, [detail, type, identifier, accessToken]);
+
     const fetchReviews = async () => {
         try {
             const fetchedReviews = await fetchReviewsForItem(identifier);
@@ -229,6 +261,22 @@ function Details() {
         }
     }, [accessToken, profile])
 
+    useEffect(() => {
+        if (profile && type === 'track' && detail) {
+            const isArtist = detail.artists.some(artist => artist.id === profile.artistID);
+            setIsCurrentUserArtist(isArtist);
+        }
+    }, [profile, detail, type]);
+
+    useEffect(() => {
+        if (isCurrentUserArtist) {
+            fetchArtistAlbums();
+        }
+    }, [isCurrentUserArtist, profile]);
+
+    useEffect(() => {
+        console.log("Detail updated:", detail);
+    }, [detail]);
     const handleReviewSubmit = async () => {
         try {
             if (profile && reviewText) {
@@ -248,7 +296,7 @@ function Details() {
     const renderAddToPlaylistSection = () => {
         if (type === 'track' && playlists.length > 0) {
             return (
-                <div>
+                <>
                     <select value={selectedPlaylist} onChange={(e) => setSelectedPlaylist(e.target.value)}>
                         <option value="">Select a playlist</option>
                         {playlists.map(playlist => (
@@ -258,7 +306,7 @@ function Details() {
                     <button onClick={handleAddToPlaylist} className={styles.addToPlaylistButton}>
                         <FaPlus />
                     </button>
-                </div>
+                </>
             );
         }
         return null;
@@ -266,12 +314,11 @@ function Details() {
 
     const renderReviews = () => (
         <div className={styles.reviewsContainer}>
-            <h4>Reviews : </h4>
-            <p> </p>
+            <h4>Reviews:</h4>
             {reviews.map((review, index) => (
-                <div key={index}    >
+                <div key={index} className={styles.reviewItem}>
                     <p>
-                        <Link to={`/profile/${review.userId._id}`} className="no-underline">
+                        <Link to={`/profile/${review.userId._id}`} className={`no-underline ${styles.reviewAuthorLink}`}>
                             {review.userId.username}
                         </Link>
                         : {review.reviewText}
@@ -280,6 +327,7 @@ function Details() {
             ))}
         </div>
     );
+
 
     const checkUserReview = async () => {
         if (profile) {
@@ -292,48 +340,41 @@ function Details() {
             }
         }
     };
-
     const renderReviewSection = () => {
         if (!profile || checkingReview) {
-            return <div>Please login to Add a Review</div>;
+            return <div className={styles.loginPrompt}>Please login to Add a Review</div>;
         }
         if (userHasReviewed) {
             const userReview = reviews.find(review => review.userId._id === profile?._id);
             return (
-                <div>
+                <div className={styles.userReviewContainer}>
                     <div className={styles.yourReviewContainer}>
-                    <p>Your Review: {userReview?.reviewText}</p>
+                        <p>Your Review: {userReview?.reviewText}</p>
                     </div>
                     <button onClick={() => handleReviewDelete(userReview?._id)} className={styles.deleteReviewButton}>
-                        Delete Review
+                        <RiDeleteBin2Line />
                     </button>
                 </div>
             );
         } else {
             return (
                 <div className={styles.reviewContainer}>
-                    <button onClick={() => setShowReviewInput(!showReviewInput)} className={styles.writeReviewButton}>
-                        {showReviewInput ? 'Hide Input Box' : 'Write a Review'}
-                    </button>
-                    {showReviewInput && (
-                        <div>
-                            <textarea
-                                className={styles.reviewTextarea}
-                                value={reviewText}
-                                onChange={(e) => setReviewText(e.target.value)}
-                                placeholder="Your review here..."
-                            />
-                            <button onClick={handleReviewSubmit} className={styles.submitReviewButton}>
-                                Submit Review
-                            </button>
-                        </div>
-                    )}
+                    <h3>Write a Review</h3>
+                    <div>
+                        <textarea
+                            className={styles.reviewTextarea}
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            placeholder="Your review here..."
+                        />
+                        <button onClick={handleReviewSubmit} className={styles.submitReviewButton}>
+                            Submit Review
+                        </button>
+                    </div>
                 </div>
             );
         }
     };
-
-
 
     const handleReviewDelete = async (reviewId) => {
         console.log('Deleting review with id:', reviewId);
@@ -395,16 +436,15 @@ function Details() {
     const renderAddToAlbumSection = () => {
         if (isCurrentUserArtist && artistAlbums.length > 0) {
             return (
-                <div>
-                    <h4>Add to Album</h4>
-                    <select onChange={(e) => setSelectedAlbum(e.target.value)}>
+                <>
+                    <select className='me-2' onChange={(e) => setSelectedAlbum(e.target.value)}>
                         <option value="">Select an album</option>
                         {artistAlbums.map(album => (
                             <option key={album._id} value={album._id}>{album.title}</option>
                         ))}
                     </select>
                     <button onClick={() => handleAddToAlbum(selectedAlbum)}>Add to Album</button>
-                </div>
+                </>
             );
         }
         return null;
@@ -419,7 +459,10 @@ function Details() {
         } else if (detail?.images?.length > 0) {
             albumImageURL = detail.images[0].url;
         }
-
+        const spotifyUrl = detail.external_urls?.spotify || 'https://open.spotify.com/';
+        const handleSpotifyPlay = () => {
+            window.open(spotifyUrl, '_blank', 'noopener,noreferrer');
+        };
         const albumName = detail?.title || detail?.name || 'No title';
         const artists = detail.artists ? detail.artists.map(artist => artist.name).join(', ') :
             (detail.tracks.items && detail.tracks.items.some(track => track.artists && track.artists.length > 0) ?
@@ -436,37 +479,42 @@ function Details() {
                         {albumImageURL && <img src={albumImageURL} alt={albumName} className={styles.albumImage} />}
                     </div>
                     <div className={styles.albumInfoContainer}>
-                        <div className="infoBottom">
-                            <p>{albumName}</p>
-                            <p>{artists} • {releaseDate} • {totalTracks} tracks</p>
-                        </div>
+                        <span className={styles.albumLabel}><BiAlbum /> Album</span>
+                        <h1>{albumName}</h1>
+                        <p>{artists} • {releaseDate} • {totalTracks} tracks</p>
                     </div>
                 </div>
+
                 <div className={styles.albumTracksContainer}>
                     <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
                         {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
+                    </button>
+                    <button onClick={handleSpotifyPlay} className={styles.spotifyPlayButton}>
+                        <FaPlayCircle color="green" />
                     </button>
                     <ul>
                         {renderAlbumTracks()}
                     </ul>
                 </div>
-                {currentTrack && (
-                    <div className={styles.audioPlayerContainer}>
-                        <audio controls autoPlay src={currentTrack.preview_url}>
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
-                )}
             </div>
         );
     };
 
     const renderTrackDetails = () => {
-        if (!detail || type !== 'track') return null;
+        if (!detail || type !== 'track' || !detail.album){
+            return <div>Loading track details...</div>;
+        }
 
         const handlePlayPreview = () => {
             playTrack({ preview_url: detail.preview_url });
         };
+
+        const spotifyUrl = detail.external_urls?.spotify || 'https://open.spotify.com/';
+        const handleSpotifyPlay = () => {
+            window.open(spotifyUrl, '_blank', 'noopener,noreferrer');
+        };
+
+        const releaseDate = detail.album?.release_date || 'Unknown Release Date';
 
         return (
             <div>
@@ -477,42 +525,38 @@ function Details() {
                         )}
                     </div>
                     <div className={styles.albumInfoContainer}>
-                        <p>{detail.name}</p>
-                        <p>{detail.album.name} • {Math.floor(detail.duration_ms / 60000)}:{((detail.duration_ms % 60000) / 1000).toFixed(0)} • {detail.artists.map(artist => artist.name).join(', ')}</p>
+                        <span className={styles.albumLabel}><TbPlayerTrackNext /> Track</span>
+                        <h1>{detail.name}</h1>
+                        <p>{releaseDate} • {formatDuration(detail.duration_ms)} • {detail.artists.map(artist => artist.name).join(', ')}</p>
                     </div>
                 </div>
-                <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
-                    {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
-                </button>
-
+                <div className={styles.albumTracksContainer}>
+                    <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
+                        {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
+                    </button>
+                    <button onClick={handleSpotifyPlay} className={styles.spotifyPlayButton}>
+                        <FaPlayCircle color="green" />
+                    </button>
+                    {renderAddToPlaylistSection()}
+                    {isCurrentUserArtist && renderAddToAlbumSection()}
+                </div>
                 <div className={styles.previewSection}>
                     <div className={styles.yourReviewContainer}>
-                    <p>Preview: {detail.preview_url && (
-                        <>
-                            <button onClick={handlePlayPreview} className={styles.playButton}>
-                                <FaPlay />
-                            </button>
-                            <div className={styles.audioPlayerContainer}>
-                                <audio controls src={detail.preview_url}>Preview not available</audio>
-                            </div>
-                        </>
-                    )}</p>
+                        {detail.preview_url && (
+                            <>
+                                <div className={styles.audioPlayerContainer}>
+                                    <audio controls src={detail.preview_url}>Preview not available</audio>
+                                </div>
+                            </>
+                        )}
                     </div>
-
                 </div>
             </div>
         );
     };
 
-
-
-
-
-
     const renderArtistDetails = () => {
         if (!detail || type !== 'artist') return null;
-
-        // Function to handle like and unlike actions
         const handleArtistLike = () => {
             if (!profile) {
                 alert('Please log in first.');
@@ -526,7 +570,10 @@ function Details() {
                 handleLike();
             }
         };
-
+        const spotifyUrl = detail.external_urls?.spotify || 'https://open.spotify.com/';
+        const handleSpotifyPlay = () => {
+            window.open(spotifyUrl, '_blank', 'noopener,noreferrer');
+        };
         return (
             <div>
                 <div className={styles.albumDetailContainer}>
@@ -536,20 +583,51 @@ function Details() {
                         )}
                     </div>
                     <div className={styles.albumInfoContainer}>
-                        <p>{detail.name}</p>
+                        <span className={styles.albumLabel}><BsPerson /> Artist</span>
+                        <h1>{detail.name}</h1>
                         <p>{detail.genres.join(', ')} • {detail.followers.total} Followers</p>
                     </div>
                 </div>
-                <div className={styles.likeButtonContainer}>
+                <div className={styles.albumTracksContainer}>
                     <button onClick={handleArtistLike} className={styles.likeButton}>
                         {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
                     </button>
-                    <br/>
-                    <a href={detail.external_urls.spotify} target="_blank" rel="noopener noreferrer" className={styles.spotifyLink}>Listen on Spotify</a>
-                    <p></p>
+                    <button onClick={handleSpotifyPlay} className={styles.spotifyPlayButton}>
+                        <FaPlayCircle color="green" />
+                    </button>
+                    <ul>
+                        {renderTopTracks()}
+                    </ul>
                 </div>
             </div>
         );
+    };
+
+    const renderTopTracks = () => {
+        if (!topTracks) return null;
+        const tracksArray = Array.isArray(topTracks) ? topTracks : topTracks.tracks;
+
+        return tracksArray.map((track, index) => (
+            <li key={track.id} className={styles.trackListItem}>
+                <div className={styles.trackDetails}>
+                    <p>{index + 1}: {track.name}</p>
+                    <p className={styles.trackArtists}>
+                        {track.artists.map(artist => artist.name).join(', ')}
+                    </p>
+                </div>
+                <button className={styles.playButton} onClick={() => playTrack(track)}>
+                    <span className='me-4'>{formatDuration(track.duration_ms)}</span>
+                    <FaPlay />
+                </button>
+                {playingTrackId === track.id && (
+                    <div className={styles.audioPlayerContainer}>
+                        <audio controls autoPlay src={track.preview_url}>
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                )}
+            </li>
+        ));
     };
 
 
@@ -563,8 +641,6 @@ function Details() {
             </div>
             <div>
                 {type === 'album' ? renderAlbumDetails() : (type === 'track' ? renderTrackDetails() : renderArtistDetails())}
-                {renderAddToPlaylistSection()}
-                {isCurrentUserArtist && renderAddToAlbumSection()}
                 {renderReviewSection()}
                 {renderReviews()}
             </div>

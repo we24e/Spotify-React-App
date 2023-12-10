@@ -265,7 +265,6 @@ function Home() {
                                 />
                             </Link>
                             <Carousel.Caption>
-                                <h3>{track.name}</h3>
                                 <p>{track.artists.map(artist => artist.name).join(', ')}</p>
                             </Carousel.Caption>
                         </Carousel.Item>
@@ -292,7 +291,6 @@ function Home() {
                                 />
                             </Link>
                             <Carousel.Caption>
-                                <h3>{album.name}</h3>
                                 <p>{album.release_date}</p>
                             </Carousel.Caption>
                         </Carousel.Item>
@@ -307,7 +305,7 @@ function Home() {
         if (!userPlaylists) return null;
         if (userPlaylists.length === 0) {
             return (
-                <p>You have not created any playlists yet.</p>
+                <p className='ps-1'>You have not created any playlists yet.</p>
             );
         }
         return (
@@ -401,7 +399,7 @@ function Home() {
     const renderReviewsSection = (reviews) => {
         if (reviews.length === 0) {
             return (
-                <p>You have not written any reviews yet.</p>
+                <p className='ps-1'>You have not written any reviews yet.</p>
             );
         }
         return (
@@ -430,7 +428,7 @@ function Home() {
     const renderLikedSection = (items, type) => {
         if (items.length === 0) {
             return (
-                <p>You have not liked any {type}s yet.</p>
+                <p className='ps-1'>You have not liked any {type}s yet.</p>
             );
         }
         if (type === 'album') {
@@ -584,7 +582,7 @@ function Home() {
             </div>
             <div className={`hero-section d-none d-md-block`}>
                 <div className="hero-content">
-                    <h1>Welcome to Your Music <RiNeteaseCloudMusicLine/> Universe</h1>
+                    <h1>Welcome to Spatify, Your <RiNeteaseCloudMusicLine/> Universe</h1>
                     <p>Explore new playlists, tracks, albums, and artists.</p>
                 </div>
             </div>
@@ -604,7 +602,7 @@ function Home() {
 
             {profile ? (
                 <div className="home-container m-2 p-2">
-                    {profile.role === "USER" && (
+                    {profile.role !== "ARTIST" && (
                         <div className="row m-1">
                             {renderPlaylistsSection()}
                         </div>
@@ -644,7 +642,7 @@ function Home() {
 
                 </div>
             ) : (
-                <p>Please log in to view more.</p>
+                <p className='ps-4'>Please log in to view more.</p>
             )}
         </div>
     );

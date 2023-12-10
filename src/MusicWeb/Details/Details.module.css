@@ -18,7 +18,8 @@
   margin-left: 20px;
 }
 
-.likeButtonContainer, .reviewSectionContainer {
+.likeButtonContainer,
+.reviewSectionContainer {
   margin-top: 20px;
 }
 
@@ -28,42 +29,43 @@
   cursor: pointer;
   margin-left: 10px;
   margin-top: 10px;
+  margin-right: 6px;
 }
 
-.likeButton:hover, .likeButton:focus {
-  background-color: transparent; /* No background change on hover */
-  outline: none; /* Remove focus outline */
-  transform: scale(1.1); /* Optional: scale up the icon a bit on hover */
+.likeButton:hover,
+.likeButton:focus {
+  background-color: transparent;
+  outline: none;
+  transform: scale(1.2);
 }
 
 .likeButton svg {
-  width: 30px;
-  height: 30px;
+  width: 35px;
+  height: 35px;
   transition: transform 0.3s
 }
 
 .deleteReviewButton {
-  font-size: 14px;
+  font-size: 15px;
   padding: 5px 10px;
   margin-left: 20px;
 }
 
 .reviewTextarea {
-  width: 90%;
+  width: 95%;
   height: 100px;
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #ccc;
   border-radius: 4px;
-  background-color: lightgrey;
+  background-color: #282828;
+  color: #fff;
+  border: 1px solid #444;
   margin-left: 20px;
 }
 
 .submitReviewButton {
-  width: 10%;
   padding: 10px 0;
   border: none;
-  background-color: rebeccapurple;
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -94,38 +96,62 @@
 
 .albumDetailContainer {
   display: flex;
-  align-items: stretch;
-  margin-top: 20px;
+  align-items: flex-end;
+  background-color: #181818;
+  padding: 20px 18px;
+  border-radius: 4px;
+}
+
+.albumLabel {
+  font-size: 16px;
+  color: #b3b3b3;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-right: 10px;
 }
 
 .albumImageContainer {
   max-width: 300px;
   margin-left: 20px;
+  width: 100%;
 }
 
 .albumImage {
   width: 100%;
   height: auto;
+  border-radius: 0;
 }
 
 .albumInfoContainer {
-  flex: 2;
-  margin-left: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end; /* Aligns content to the bottom */
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  margin-left: 22px;
 }
 
 .infoBottom {
-  margin-top: auto; /* Pushes the content to the bottom */
+  margin-top: auto;
 }
 
+.albumInfoContainer h1 {
+  font-size: 70px;
+  font-weight: 600;
+}
+
+.custom-h1 {
+  font-size: 20px !important;
+  font-weight: bold;
+}
 
 .albumInfoContainer p:first-child {
   font-size: 55px;
   font-weight: bold;
 }
 
+.albumTracksContainer {
+  list-style: none;
+  padding: 0;
+}
 
 .albumTracksContainer li p:first-child {
   font-size: 18px;
@@ -135,6 +161,7 @@
 .artistDetailContainer {
   display: flex;
   align-items: start;
+  margin-left: 10px;
 }
 
 .artistImageContainer {
@@ -156,44 +183,111 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color:  #bb86fc;
+  background-color: #bb86fc;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-  padding: 0px 0; /* Adjust vertical padding as needed, but keep horizontal padding 0 */
+  padding: 0px 0;
   z-index: 1000;
+  opacity: 0.95;
 }
 
+@media (max-width: 768px) {
+  .audioPlayerContainer {
+    left: 0;
+  }
+}
 
-html, body {
-  margin: 0;
-  padding: 0;
-  /* Other styles if necessary */
+@media (min-width: 769px) {
+  .audioPlayerContainer {
+    left: 8.4%;
+  }
 }
 
 .trackListItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px 4px;
+  margin-right: 4px;
 }
 
+.trackListItem p:first-child {
+  font-size: 16px;
+  color: #fff;
+  margin: 0;
+}
+
+.trackListItem:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
 
 .playButton {
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
+  margin-right: 10px;
   transition: transform 0.3s;
-  /* Add other styles as needed */
 }
 
-.playButton:hover, .playButton:focus {
-  background-color: transparent; /* No background change on hover */
-  outline: none; /* Remove focus outline */
-  transform: scale(1.1); /* Optional: scale up the icon a bit on hover */
+.playButton:hover {
+  background-color: transparent;
+  outline: none;
+  transform: scale(1.25);
 }
+
+.playButton svg {
+  fill: #bb86fc;
+}
+
 .reviewsContainer {
-  padding-bottom: 80px;
-  margin-left: 20px;
-  margin-top: 20px;
+  background-color: #202020;
+  color: #e0e0e0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  margin: 15px;
 }
+
+.reviewsContainer h4 {
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+}
+
+.reviewsContainer p {
+  color: #a9a9a9;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.reviewItem {
+  background-color: #282828;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.reviewItem p {
+  margin: 0;
+  color: #ccc;
+  font-size: 16px;
+}
+
+.reviewAuthorLink {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.reviewAuthorLink:hover {
+  color: #82c4f8 !important;
+  text-decoration: underline;
+}
+
 
 .yourReviewContainer {
   margin-left: 18px;
@@ -220,5 +314,118 @@ html, body {
 
 .add-to-playlist-button:hover {
   color: #000;
-  transform: scale(1.1); 
+  transform: scale(1.1);
+}
+
+.spotifyPlayButton {
+  background-color: transparent !important;
+  color: #1DB954 !important;
+  cursor: pointer;
+  font-size: 30px;
+  outline: none;
+  background: none;
+  border: none !important;
+  cursor: pointer;
+  padding: 0px;
+}
+
+.spotifyPlayButton:hover,
+.spotifyPlayButton:focus {
+  color: salmon !important;
+  background-color: transparent;
+  outline: none;
+  transform: scale(1.2);
+}
+
+.spotifyPlayButton svg {
+  width: 37px;
+  height: 37px;
+  transition: transform 0.3s
+}
+
+/* .likeButton:active, .likeButton:focus,
+.spotifyPlayButton:active, .spotifyPlayButton:focus {
+  outline: none !important;
+  box-shadow: none !important;
+} */
+
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.trackArtists {
+  font-size: 16px;
+  color: #b3b3b3;
+  margin-left: 20px;
+}
+
+.loginPrompt {
+  color: #e0e0e0;
+  background-color: #333;
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.userReviewContainer,
+.reviewContainer {
+  background-color: #202020;
+  color: #e0e0e0;
+  padding: 15px;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-bottom: 0px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.userReviewContainer {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 10px;
+}
+
+.userReviewContainer p {
+  margin: 0 !important;
+  color: #ccc;
+  font-size: 16px;
+}
+
+.deleteReviewButton,
+.submitReviewButton,
+.writeReviewButton {
+  background-color: #4a148c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deleteReviewButton:hover,
+.submitReviewButton:hover,
+.writeReviewButton:hover {
+  background-color: #6a1b9a;
+  transform: translateY(-2px);
+}
+
+.yourReviewContainer p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .audioPlayerContainer {
+    left: 0;
+    width: 100%;
+  }
+}
+.deleteReviewButton {
+  background-color: red;
+  color: white !important;
+  padding: 10px 15px;
 }

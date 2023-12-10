@@ -7,6 +7,7 @@ import * as userClient from '../users/client';
 import { ListGroup, ListGroupItem, Button, Alert, Card } from 'react-bootstrap';
 import './index.css';
 import { RiDeleteBinLine } from "react-icons/ri";
+import { PiContactlessPaymentLight } from 'react-icons/pi';
 
 function Playlists() {
     const { playlistId } = useParams();
@@ -18,12 +19,7 @@ function Playlists() {
         try {
             const playlistData = await client.fetchPlaylistById(playlistId);
             setPlaylist(playlistData);
-            const storedTracksDetails = localStorage.getItem(`tracksDetails_${playlistId}`);
-            if (storedTracksDetails) {
-                setTracksDetails(JSON.parse(storedTracksDetails));
-            } else {
-                fetchTracksDetails(playlistData.trackIDs);
-            }
+            fetchTracksDetails(playlistData.trackIDs);
         } catch (error) {
             console.error("Error fetching playlist details:", error);
         }
@@ -35,7 +31,6 @@ function Playlists() {
                 trackIds.map(trackId => fetchItemDetails(trackId, 'track', accessToken))
             );
             setTracksDetails(details);
-            localStorage.setItem(`tracksDetails_${playlistId}`, JSON.stringify(details));
         } catch (error) {
             console.error("Error fetching track details:", error);
         }
@@ -71,15 +66,15 @@ function Playlists() {
     };
 
     return (
-        <div className="container-fluid p-1 m-0 mt-1">
-                        <div class="animation-wrapper">
+        <div className="container-playlist p-1 m-0 mt-1">
+            <div class="animation-wrapper">
                 <div class="particle particle-1"></div>
                 <div class="particle particle-2"></div>
                 <div class="particle particle-3"></div>
                 <div class="particle particle-4"></div>
             </div>
             {playlist ? (
-                <div className="playlist-card shadow-sm p-2 mb-2 rounded">
+                <div className="playlist-card shadow-sm p-2 rounded">
                     <h2 className="playlist-title">Playlist: {playlist.title}</h2>
                     <div className="track-list">
                         {tracksDetails.map((track, index) => (
@@ -109,7 +104,7 @@ function Playlists() {
                                         Your browser does not support the audio element.
                                     </audio>
                                 )}
-                                <hr className='custom-hr'/>
+                                <hr className='custom-hr' />
                             </div>
                         ))}
                     </div>
