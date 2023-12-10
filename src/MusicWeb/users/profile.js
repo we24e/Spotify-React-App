@@ -181,11 +181,11 @@ function Profile() {
                         <div className="form-grid">
                             <div className="label">First Name:</div>
                             <div className="label">Last Name:</div>
-                            <input className="form-control futuristic-input" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} />
-                            <input className="form-control futuristic-input" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} />
+                            <input className="form-control futuristic-input" placeholder="first name" value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} />
+                            <input className="form-control futuristic-input" placeholder="last name" value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} />
                         </div>
-                        <label>Username: <input className="form-control futuristic-input disabled-input" value={profile.username} disabled /></label>
-                        <label>Password: <input className="form-control futuristic-input" value={profile.password} onChange={(e) => setProfile({ ...profile, password: e.target.value })} /></label>
+                        <label>Username: <input placeholder="username"  className="form-control futuristic-input disabled-input" value={profile.username} disabled /></label>
+                        <label>Password: <input placeholder="pswd" className="form-control futuristic-input" value={profile.password} onChange={(e) => setProfile({ ...profile, password: e.target.value })} /></label>
 
                         <label>Date of Birth:
                             <input
@@ -195,7 +195,7 @@ function Profile() {
                                 onChange={(e) => setProfile({ ...profile, dob: formatBackToISO(e.target.value) })}
                             />
                         </label>
-                        <label>Email: <input className="form-control futuristic-input" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} /></label>
+                        <label>Email: <input placeholder="email" className="form-control futuristic-input" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} /></label>
                         <label>Role:
                             <select value={profile.role} className="form-control futuristic-input disabled-input" disabled>
                                 <option value="USER">User</option>
@@ -206,6 +206,7 @@ function Profile() {
                         {profile.role === "ARTIST" && (
                             <label>Artist ID:
                                 <input
+                                    placeholder="Artist ID" 
                                     className="form-control futuristic-input"
                                     value={profile.artistID || ''}
                                     onChange={(e) => setProfile({ ...profile, artistID: e.target.value })}
@@ -216,6 +217,7 @@ function Profile() {
                         {profile.role === "ADMIN" && (
                             <label>Timezone:
                                 <select
+                                    placeholder="Select Timezone"
                                     value={profile.timezone}
                                     className="form-control futuristic-input"
                                     onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}

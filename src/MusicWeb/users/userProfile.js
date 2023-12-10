@@ -403,7 +403,6 @@ function UserProfile() {
                 <p>User haven't liked any {type}s yet.</p>
             );
         }
-        console.log(items);
         return (
             <Carousel>
                 {items.map(item => (

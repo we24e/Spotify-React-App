@@ -35,7 +35,6 @@ export const fetchItemDetails = async (id, type, accessToken) => {
 };
 
 export const fetchArtistAlbums = async (artistId, market, accessToken) => {
-    console.log(artistId)
     if (!accessToken) {
         console.error('Access token is not available');
         return null;

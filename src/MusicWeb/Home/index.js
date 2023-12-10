@@ -431,9 +431,6 @@ function Home() {
                 <p className='ps-1'>You have not liked any {type}s yet.</p>
             );
         }
-        if (type === 'album') {
-            console.log(items);
-        }
         return (
             <div className="card-container">
                 {items.map(item => (
