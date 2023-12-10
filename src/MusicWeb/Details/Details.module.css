@@ -45,20 +45,22 @@
 .deleteReviewButton {
   font-size: 14px;
   padding: 5px 10px;
+  margin-left: 20px;
 }
 
 .reviewTextarea {
-  width: 100%;
+  width: 90%;
   height: 100px;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   background-color: lightgrey;
+  margin-left: 20px;
 }
 
 .submitReviewButton {
-  width: 100%;
+  width: 10%;
   padding: 10px 0;
   border: none;
   background-color: rebeccapurple;
@@ -66,6 +68,7 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-left: 20px;
 }
 
 .submitReviewButton:hover {
@@ -80,6 +83,7 @@
   border-radius: 4px;
   cursor: pointer;
   margin-bottom: 10px;
+  margin-left: 20px;
   transition: background-color 0.3s;
 }
 
@@ -95,6 +99,7 @@
 
 .albumImageContainer {
   max-width: 300px;
+  margin-left: 20px;
 }
 
 .albumImage {
@@ -104,7 +109,7 @@
 
 .albumInfoContainer {
   flex: 2;
-  margin-left: 20px;
+  margin-left: 40px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end; /* Aligns content to the bottom */
@@ -167,7 +172,6 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* Add other styles as needed */
 }
 
 
@@ -185,7 +189,16 @@ html, body {
   transform: scale(1.1); /* Optional: scale up the icon a bit on hover */
 }
 .reviewsContainer {
-  /* Adjust the padding or margin as needed based on the height of your play control bar */
   padding-bottom: 80px;
+  margin-left: 20px;
+  margin-top: 20px;
 }
 
+.yourReviewContainer {
+  margin-left: 18px;
+}
+
+.spotifyLink {
+  text-decoration: none;
+  margin-left: 20px;
+}

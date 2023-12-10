@@ -263,7 +263,8 @@ function Details() {
 
     const renderReviews = () => (
         <div className={styles.reviewsContainer}>
-            <h4>Reviews:</h4>
+            <h4>Reviews : </h4>
+            <p> </p>
             {reviews.map((review, index) => (
                 <div key={index}    >
                     <p>
@@ -297,8 +298,9 @@ function Details() {
             const userReview = reviews.find(review => review.userId._id === profile?._id);
             return (
                 <div>
-                    <h4>Your Review:</h4>
-                    <p>{userReview?.reviewText}</p>
+                    <div className={styles.yourReviewContainer}>
+                    <p>Your Review: {userReview?.reviewText}</p>
+                    </div>
                     <button onClick={() => handleReviewDelete(userReview?._id)} className={styles.deleteReviewButton}>
                         Delete Review
                     </button>
@@ -459,56 +461,93 @@ function Details() {
     const renderTrackDetails = () => {
         if (!detail || type !== 'track') return null;
 
-        return (
-            <div className={styles.trackDetailContainer}>
-                <div className={styles.trackImageContainer}>
-                    {detail.album.images && <img src={detail.album.images[0].url} alt={detail.album.name} className={styles.trackImage} />}
-                </div>
-                <div className={styles.trackInfoContainer}>
-                    <h3>{detail.name}</h3>
-                    <p>Album: {detail.album.name}</p>
-                    <p>Duration: {Math.floor(detail.duration_ms / 60000)}:{((detail.duration_ms % 60000) / 1000).toFixed(0)}</p>
-                    <p>Artists: {detail.artists.map(artist => artist.name).join(', ')}</p>
-                    {detail.preview_url ? (
-                        <div>
-                            <p>Preview:</p>
-                            <audio controls src={detail.preview_url}>Preview not available</audio>
-                        </div>
-                    ) : (
-                        <div>
-                            <p>Preview not available due to copyright.</p>
-                        </div>
-                    )}
-                    <a href={detail.external_urls.spotify} target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
-                </div>
+        const handlePlayPreview = () => {
+            playTrack({ preview_url: detail.preview_url });
+        };
 
+        return (
+            <div>
+                <div className={styles.albumDetailContainer}>
+                    <div className={styles.albumImageContainer}>
+                        {detail.album.images && (
+                            <img src={detail.album.images[0].url} alt={detail.album.name} className={styles.trackImage} />
+                        )}
+                    </div>
+                    <div className={styles.albumInfoContainer}>
+                        <p>{detail.name}</p>
+                        <p>{detail.album.name} • {Math.floor(detail.duration_ms / 60000)}:{((detail.duration_ms % 60000) / 1000).toFixed(0)} • {detail.artists.map(artist => artist.name).join(', ')}</p>
+                    </div>
+                </div>
+                <button onClick={isLiked ? handleUnlike : handleLike} className={styles.likeButton}>
+                    {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
+                </button>
+                <div className={styles.previewSection}>
+                    <div className={styles.yourReviewContainer}>
+                    <p>Preview: {detail.preview_url && (
+                        <>
+                            <button onClick={handlePlayPreview} className={styles.playButton}>
+                                <FaPlay />
+                            </button>
+                            <div className={styles.audioPlayerContainer}>
+                                <audio controls src={detail.preview_url}>Preview not available</audio>
+                            </div>
+                        </>
+                    )}</p>
+                    </div>
+
+                </div>
             </div>
         );
     };
+
+
+
+
 
 
     const renderArtistDetails = () => {
         if (!detail || type !== 'artist') return null;
 
+        // Function to handle like and unlike actions
+        const handleArtistLike = () => {
+            if (!profile) {
+                alert('Please log in first.');
+                navigate('/login');
+                return;
+            };
+
+            if (isLiked) {
+                handleUnlike();
+            } else {
+                handleLike();
+            }
+        };
+
         return (
             <div>
-                <div className={styles.artistDetailContainer}>
-                    <div className={styles.artistImageContainer}>
+                <div className={styles.albumDetailContainer}>
+                    <div className={styles.albumImageContainer}>
                         {detail.images && detail.images.length > 0 && (
-                            <img src={detail.images[0].url} alt={detail.name} className={styles.artistImage} />
+                            <img src={detail.images[0].url} alt={detail.name} className={styles.albumImage} />
                         )}
                     </div>
-                    <div className={styles.artistInfoContainer}>
-                        <h3>{detail.name}</h3>
-                        <p>Genres: {detail.genres.join(', ')}</p>
-                        <p>Popularity: {detail.popularity}</p>
-                        <p>Followers: {detail.followers.total}</p>
-                        <a href={detail.external_urls.spotify} target="_blank" rel="noopener noreferrer">Listen on Spotify</a>
+                    <div className={styles.albumInfoContainer}>
+                        <p>{detail.name}</p>
+                        <p>{detail.genres.join(', ')} • {detail.followers.total} Followers</p>
                     </div>
+                </div>
+                <div className={styles.likeButtonContainer}>
+                    <button onClick={handleArtistLike} className={styles.likeButton}>
+                        {isLiked ? <FaHeart color="red" /> : <FaRegHeart />}
+                    </button>
+                    <br/>
+                    <a href={detail.external_urls.spotify} target="_blank" rel="noopener noreferrer" className={styles.spotifyLink}>Listen on Spotify</a>
+                    <p></p>
                 </div>
             </div>
         );
     };
+
 
     return (
         <div>
@@ -520,15 +559,21 @@ function Details() {
             </div>
             <div>
                 {type === 'album' ? renderAlbumDetails() : (type === 'track' ? renderTrackDetails() : renderArtistDetails())}
-                <div className={styles.likeButtonContainer}>
-                </div>
                 {renderAddToPlaylistSection()}
                 {isCurrentUserArtist && renderAddToAlbumSection()}
                 {renderReviewSection()}
                 {renderReviews()}
             </div>
+            {currentTrack && (
+                <div className={styles.audioPlayerContainer}>
+                    <audio controls autoPlay src={currentTrack.preview_url}>
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            )}
         </div>
     );
+
 }
 
 export default Details;
