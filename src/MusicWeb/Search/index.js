@@ -65,7 +65,6 @@ function renderResults(results) {
     };
 
     const renderTracks = (tracks) => {
-        console.log(tracks);
         return tracks.items.map(track => renderItemCard(track, 'track', track.album.images[0]?.url, track.name, track.artists.map(artist => artist.name).join(', ')));
     };
 

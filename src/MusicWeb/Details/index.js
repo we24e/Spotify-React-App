@@ -118,7 +118,6 @@ function Details() {
                     if (trackDetails && trackDetails.artists && trackDetails.artists.length > 0) {
                         trackDetails.artists.forEach(artist => {
                             if (artist.id === profile.artistID) {
-                                console.log(`Match found for artist: ${artist.name}`);
                                 setIsCurrentUserArtist(true);
                             }
                         });
@@ -274,14 +273,10 @@ function Details() {
         }
     }, [isCurrentUserArtist, profile]);
 
-    useEffect(() => {
-        console.log("Detail updated:", detail);
-    }, [detail]);
     const handleReviewSubmit = async () => {
         try {
             if (profile && reviewText) {
                 await createReview(profile._id, reviewText, type, identifier);
-                console.log('Review submitted successfully');
                 setReviewText('');
                 setUserHasReviewed(true);
                 fetchReviews();
@@ -377,7 +372,6 @@ function Details() {
     };
 
     const handleReviewDelete = async (reviewId) => {
-        console.log('Deleting review with id:', reviewId);
         try {
             await deleteReview(reviewId);
             setUserHasReviewed(false);

@@ -97,17 +97,17 @@ function UserTable() {
                         </tr>
                         <tr>
                             <td>
-                                <input className="table-input form-control" value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })} />
+                                <input className="table-input form-control" placeholder="username" value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })} />
 
                             </td>
                             <td>
-                                <input className="table-input form-control" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
+                                <input className="table-input form-control" placeholder="password" value={user.password} onChange={(e) => setUser({ ...user, password: e.target.value })} />
                             </td>
                             <td>
-                                <input className="table-input form-control" value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} />
+                                <input className="table-input form-control" placeholder="first name" value={user.firstName} onChange={(e) => setUser({ ...user, firstName: e.target.value })} />
                             </td>
                             <td>
-                                <input className="table-input form-control" value={user.lastName} onChange={(e) => setUser({ ...user, lastName: e.target.value })} />
+                                <input className="table-input form-control" placeholder="last name" value={user.lastName} onChange={(e) => setUser({ ...user, lastName: e.target.value })} />
                             </td>
                             <td>
                                 <select value={user.role} onChange={(e) => setUser({ ...user, role: e.target.value })}>
