@@ -4,7 +4,7 @@ import * as client from "./client";
 import "./signin.css";
 import '../randomCss/galaxy.scss';
 
-function Signup() {
+function Signup({ onSignUp }) {
   const [error, setError] = useState("");
   const [credentials, setCredentials] = useState({
     username: "",
@@ -28,8 +28,10 @@ function Signup() {
       if (response && response.message === "User created successfully") {
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('username', credentials.username);
+        if (typeof onSignUp === 'function') {
+          onSignUp(credentials.username);
+        }
         navigate("/profile");
-        window.location.reload();
       } else {
         setError("Unexpected response from server");
       }

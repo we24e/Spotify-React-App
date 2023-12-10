@@ -4,7 +4,7 @@ import * as client from "./client";
 import "./signin.css";
 import '../randomCss/galaxy.scss';
 
-function Signin() {
+function Signin({ onSignIn }) {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -16,11 +16,11 @@ function Signin() {
     }
     try {
       const response = await client.signin(credentials);
-      if (response) {
+      if (response && typeof onSignIn === 'function') {
+        onSignIn(credentials.username);
         localStorage.setItem('isAuthenticated', 'true');
         localStorage.setItem('username', credentials.username);
         navigate("/profile");
-        window.location.reload();
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
