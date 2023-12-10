@@ -10,7 +10,8 @@ export const AccessTokenProvider = ({ children }) => {
     useEffect(() => {
         const getAccessToken = async () => {
             try {
-                const response = await axios.post('http://localhost:4000/getAccessToken');
+                const apiUrl = process.env.REACT_APP_BASE_API_URL || 'http://localhost:4000';
+                const response = await axios.post(`${apiUrl}/getAccessToken`);
                 setAccessToken(response.data.access_token);
             } catch (error) {
                 console.error('Error fetching access token:', error);
