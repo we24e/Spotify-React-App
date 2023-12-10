@@ -1,6 +1,5 @@
 import React from 'react';
 import './index.css';
-import logo from './logo.png';
 import { ReactComponent as Logo } from './logo.svg';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Home from './Home';
@@ -25,23 +24,12 @@ import { BiLogOutCircle } from "react-icons/bi"
 import { TiThMenuOutline } from "react-icons/ti";
 import Footer from './Footer';
 
-function NavBar({ menuOpen }) {
-    const [isUserSignedIn, setIsUserSignedIn] = useState(false);
+function NavBar({ isUserSignedIn, username, onSignOut, menuOpen }) {
     const navigate = useNavigate();
-    const [username, setUsername] = useState('');
-
-    useEffect(() => {
-        const savedUsername = localStorage.getItem('username');
-        if (savedUsername) {
-            setUsername(savedUsername);
-            setIsUserSignedIn(true);
-        }
-    }, []);
 
     const handleSignOut = async () => {
         try {
             await client.signout();
-            setIsUserSignedIn(false);
             localStorage.removeItem('isAuthenticated');
             localStorage.removeItem('username');
             navigate('/login');
@@ -92,7 +80,7 @@ function NavBar({ menuOpen }) {
                     </li>
                     {isUserSignedIn && (
                         <li className="navbar-item flexbox-left navbar-bottom">
-                            <button onClick={handleSignOut} className="navbar-item-inner flexbox signout-button">
+                            <button onClick={onSignOut} className="navbar-item-inner flexbox signout-button">
                                 <BiLogOutCircle className='nav-icon' />
                                 <span className="link-text ms-1">Sign Out</span>
                             </button>
@@ -106,7 +94,7 @@ function NavBar({ menuOpen }) {
 }
 function MusicWeb() {
     const [menuOpen, setMenuOpen] = useState(false);
-
+    const [username, setUsername] = useState('');
     const [isUserSignedIn, setIsUserSignedIn] = useState(false);
 
     useEffect(() => {
@@ -121,6 +109,20 @@ function MusicWeb() {
             setMenuOpen(false);
         }
     };
+    const handleSignIn = (username) => {
+        setIsUserSignedIn(true);
+        setUsername(username);
+        localStorage.setItem('username', username);
+        localStorage.setItem('isAuthenticated', 'true');
+    };
+
+    const handleSignUp = (username) => {
+        setIsUserSignedIn(true);
+        setUsername(username);
+        localStorage.setItem('username', username);
+        localStorage.setItem('isAuthenticated', 'true');
+      };
+
     const handleSignOut = async () => {
         try {
             await client.signout();
@@ -151,7 +153,7 @@ function MusicWeb() {
                                 <TiThMenuOutline />
                             </div>
                         </div>
-                        <NavBar />
+                        <NavBar isUserSignedIn={isUserSignedIn} username={username} onSignOut={handleSignOut} />
                         <div className="col-md-11 body-expand">
                             {menuOpen && (
                                 <div className="mobile-nav">
@@ -198,8 +200,8 @@ function MusicWeb() {
                             )}
                             <main>
                                 <Routes>
-                                    <Route path="/login" element={<Login />} />
-                                    <Route path="/signup" element={<Register />} />
+                                    <Route path="/login" element={<Login onSignIn={handleSignIn} />} />
+                                    <Route path="/signup" element={<Register onSignUp={handleSignUp}/>} />
                                     <Route path="/home" element={<Home />} />
                                     <Route path="/search" element={<Search />} />
                                     <Route path="/details" element={<Details />} />
